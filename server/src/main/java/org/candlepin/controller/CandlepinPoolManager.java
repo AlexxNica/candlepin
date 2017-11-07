@@ -973,10 +973,9 @@ public class CandlepinPoolManager implements PoolManager {
         consumerCurator.update(consumer);
 
         handler.handleSelfCertificate(consumer, pool, entitlement, generateUeberCert);
-        for (Entitlement regenEnt : entitlementCurator.listModifying(entitlement)) {
-            // Lazily regenerate modified certificates:
-            this.regenerateCertificatesOf(regenEnt, generateUeberCert, true);
-        }
+
+        int count = this.entitlementCurator.markDependentEntitlementsDirty(Arrays.asList(entitlement), false);
+        log.info("{} dependent entitlements flagged for regeneration", count);
 
         // we might have changed the bonus pool quantities, lets find out.
         handler.handleBonusPools(pool, entitlement);
@@ -1093,9 +1092,9 @@ public class CandlepinPoolManager implements PoolManager {
      */
     @Override
     @Transactional
-    public void regenerateCertificatesOf(Environment e, Set<String> affectedContent,
-        boolean lazy) {
-        log.info("Regenerating relevant certificates in environment: " + e.getId());
+    public void regenerateCertificatesOf(Environment e, Set<String> affectedContent, boolean lazy) {
+        log.info("Regenerating relevant certificates in environment: {}", e.getId());
+
         List<Entitlement> allEnvEnts = entitlementCurator.listByEnvironment(e);
         Set<Entitlement> entsToRegen = new HashSet<Entitlement>();
         for (Entitlement ent : allEnvEnts) {
@@ -1117,7 +1116,8 @@ public class CandlepinPoolManager implements PoolManager {
                 }
             }
         }
-        log.info("Found " + entsToRegen.size() + " certificates to regenerate.");
+
+        log.info("Found {} certificates to regenerate.", entsToRegen.size());
 
         regenerateCertificatesOf(entsToRegen, lazy);
     }
@@ -1127,17 +1127,16 @@ public class CandlepinPoolManager implements PoolManager {
      */
     @Override
     @Transactional
-    public void regenerateCertificatesOf(Entitlement e, boolean ueberCertificate,
-        boolean lazy) {
+    public void regenerateCertificatesOf(Entitlement e, boolean ueberCertificate, boolean lazy) {
 
         if (lazy) {
-            log.info("Marking certificates dirty for entitlement: " + e);
+            log.info("Marking certificates dirty for entitlement: {}", e);
             e.setDirty(true);
             return;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Revoking entitlementCertificates of : " + e);
+            log.debug("Revoking entitlementCertificates of: {}", e);
         }
 
         Entitlement tempE = new Entitlement();
@@ -1194,9 +1193,7 @@ public class CandlepinPoolManager implements PoolManager {
      * anyhow, true otherwise. Prevents a deadlock issue on mysql (at least).
      */
     @Transactional
-    void removeEntitlement(Entitlement entitlement,
-        boolean regenModified) {
-
+    void removeEntitlement(Entitlement entitlement, boolean regenModified) {
         Consumer consumer = entitlement.getConsumer();
         Pool pool = entitlement.getPool();
 
@@ -1219,10 +1216,16 @@ public class CandlepinPoolManager implements PoolManager {
             for (Entitlement e : p.getEntitlements()) {
                 this.revokeEntitlement(e);
             }
+
             deletablePools.add(p);
         }
         for (Pool dp : deletablePools) {
             deletePool(dp);
+        }
+
+        if (regenModified) {
+            int c = this.entitlementCurator.markDependentEntitlementsDirty(Arrays.asList(entitlement), true);
+            log.info("{} dependent entitlements flagged for regeneration", c);
         }
 
         pool.getEntitlements().remove(entitlement);
@@ -1244,8 +1247,7 @@ public class CandlepinPoolManager implements PoolManager {
             String stackId = pool.getProductAttributeValue("stacking_id");
             Pool stackedSubPool = poolCurator.getSubPoolForStackId(consumer, stackId);
             if (stackedSubPool != null) {
-                List<Entitlement> stackedEnts =
-                    this.entitlementCurator.findByStackId(consumer, stackId);
+                List<Entitlement> stackedEnts = this.entitlementCurator.findByStackId(consumer, stackId);
 
                 // If there are no stacked entitlements, we need to delete the
                 // stacked sub pool, else we update it based on the entitlements
@@ -1264,15 +1266,7 @@ public class CandlepinPoolManager implements PoolManager {
         PoolHelper poolHelper = new PoolHelper(this, productCache, entitlement);
         enforcer.postUnbind(consumer, poolHelper, entitlement);
 
-        if (regenModified) {
-            // Find all of the entitlements that modified the original entitlement,
-            // and regenerate those to remove the content sets.
-            // Lazy regeneration is ok here.
-            this.regenerateCertificatesOf(entitlementCurator
-                .listModifying(entitlement), true);
-        }
-
-        log.info("Revoked entitlement: " + entitlement.getId());
+        log.info("Revoked entitlement: {}", entitlement.getId());
 
         // If we don't care about updating other entitlements based on this one, we probably
         // don't care about updating compliance either.
@@ -1329,6 +1323,10 @@ public class CandlepinPoolManager implements PoolManager {
             poolCurator.merge(pool);
         }
 
+
+        int count = this.entitlementCurator.markDependentEntitlementsDirty(entsToRevoke, true);
+        log.info("{} dependent entitlements flagged for regeneration", count);
+
         log.info("Starting batch delete of pools and entitlements");
         poolCurator.batchDelete(poolsToDelete);
         entitlementCurator.batchDelete(entsToRevoke);
@@ -1366,28 +1364,9 @@ public class CandlepinPoolManager implements PoolManager {
             enforcer.postUnbind(ent.getConsumer(), poolHelper, ent);
         }
 
-        List<Entitlement> batch = new ArrayList<Entitlement>();
-        for (int i = 0; i < entsToRevoke.size(); i++) {
-            Entitlement entitlement = entsToRevoke.get(i);
-            batch.add(entitlement);
-
-            // We work in batches of maximum size 1000.
-            if (i % 1000 == 0) {
-                Set<Entitlement> modifiedEnts = entitlementCurator.batchListModifying(batch);
-                this.regenerateCertificatesOf(modifiedEnts, true);
-                batch.clear();
-            }
-        }
-
-        if (!batch.isEmpty()) {
-            this.regenerateCertificatesOf(entitlementCurator.batchListModifying(batch), true);
-        }
-
-        log.info("Modifier entitlements done.");
-
         Set<Consumer> distinctConsumers = entitlementCurator.getDistinctConsumers(entsToRevoke);
 
-        log.info("Recomputing status for " + distinctConsumers.size() + " consumers.");
+        log.info("Recomputing status for {} consumers.", distinctConsumers.size());
         int i = 1;
         for (Consumer consumer : distinctConsumers) {
             if (i++ % 1000 == 0) {
@@ -1522,7 +1501,7 @@ public class CandlepinPoolManager implements PoolManager {
         List<Entitlement> dirtyEntitlements = new ArrayList<Entitlement>();
         for (Entitlement e : entitlements) {
             if (e.getDirty()) {
-                log.info("Found dirty entitlement to regenerate: " + e);
+                log.info("Found dirty entitlement to regenerate: {}", e);
                 dirtyEntitlements.add(e);
             }
         }

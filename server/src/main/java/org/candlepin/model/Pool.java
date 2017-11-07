@@ -944,8 +944,11 @@ public class Pool extends AbstractHibernateObject implements Persisted, Owned, N
         return derivedProvidedProducts;
     }
 
-    public void setDerivedProvidedProducts(
-        Set<DerivedProvidedProduct> subProvidedProducts) {
+    public void setDerivedProvidedProducts(Set<DerivedProvidedProduct> subProvidedProducts) {
+        for (DerivedProvidedProduct pp : subProvidedProducts) {
+            pp.setPool(this);
+        }
+
         this.derivedProvidedProducts = subProvidedProducts;
     }
 

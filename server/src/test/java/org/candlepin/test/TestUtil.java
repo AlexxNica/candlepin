@@ -68,8 +68,16 @@ public class TestUtil {
     private TestUtil() {
     }
 
+    public static Owner createOwner(String key, String name) {
+        return new Owner(key, name);
+    }
+
+    public static Owner createOwner(String key) {
+        return createOwner(key, key);
+    }
+
     public static Owner createOwner() {
-        return new Owner("Test Owner " + randomInt());
+        return createOwner("Test Owner " + randomInt());
     }
 
     public static Consumer createConsumer(ConsumerType type, Owner owner) {
@@ -115,12 +123,14 @@ public class TestUtil {
         return Math.abs(RANDOM.nextInt());
     }
 
-    public static Content createContent(String id) {
-        String name = "test-content-" + randomInt();
+    public static int randomInt(int max) {
+        return Math.abs(RANDOM.nextInt(max));
+    }
 
+    public static Content createContent(String id, String name) {
         return new Content(
             name,
-            name,
+            id,
             name,
             "test-type",
             "test-vendor",
@@ -128,6 +138,10 @@ public class TestUtil {
             "https://gpg.test.url.com",
             "x86"
         );
+    }
+
+    public static Content createContent(String id) {
+        return createContent(id, id);
     }
 
     public static Product createProduct(String id, String name) {

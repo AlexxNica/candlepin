@@ -34,6 +34,7 @@ import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCurator;
 import org.candlepin.model.ConsumerType;
 import org.candlepin.model.ConsumerTypeCurator;
+import org.candlepin.model.Content;
 import org.candlepin.model.ContentCurator;
 import org.candlepin.model.Entitlement;
 import org.candlepin.model.EntitlementCertificate;
@@ -77,9 +78,11 @@ import org.xnap.commons.i18n.I18n;
 import org.xnap.commons.i18n.I18nFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -207,7 +210,6 @@ public class DatabaseTestFixture {
     /**
      * Helper to commit the current db transaction. Pretty simple for now, but
      * may require additional logic and error handling down the road.
-
      */
     protected void commitTransaction() {
         entityManager().getTransaction().commit();
@@ -216,13 +218,44 @@ public class DatabaseTestFixture {
     protected void rollbackTransaction() {
         entityManager().getTransaction().rollback();
     }
+
+    protected Pool createPool(Owner owner, Product product, Collection<Product> provided, Long quantity,
+        Date startDate, Date endDate) {
+
+        Set<ProvidedProduct> providedProducts = null;
+
+        if (provided != null) {
+            providedProducts = new HashSet<ProvidedProduct>();
+
+            for (Product prod : provided) {
+                providedProducts.add(new ProvidedProduct(prod.getId(), prod.getName()));
+            }
+        }
+
+        Pool pool = new Pool(
+            owner,
+            product.getId(),
+            product.getName(),
+            providedProducts,
+            quantity,
+            startDate,
+            endDate,
+            DEFAULT_CONTRACT,
+            DEFAULT_ACCOUNT,
+            DEFAULT_ORDER
+        );
+
+        return poolCurator.create(pool);
+    }
+
     /**
      * Create an entitlement pool and matching subscription.
      *
      * @return an entitlement pool and matching subscription.
      */
-    protected Pool createPoolAndSub(Owner owner, Product product,
-        Long quantity, Date startDate, Date endDate) {
+    protected Pool createPoolAndSub(Owner owner, Product product, Long quantity, Date startDate,
+        Date endDate) {
+
         Pool p = new Pool(owner, product.getId(), product.getName(),
             new HashSet<ProvidedProduct>(), quantity, startDate, endDate,
             DEFAULT_CONTRACT, DEFAULT_ACCOUNT, DEFAULT_ORDER);
@@ -235,21 +268,43 @@ public class DatabaseTestFixture {
             p.addProductAttribute(new ProductPoolAttribute(pa.getName(),
                 pa.getValue(), product.getId()));
         }
+
         return poolCurator.create(p);
     }
 
     protected Owner createOwner() {
-        Owner o = new Owner("Test Owner " + TestUtil.randomInt());
-        ownerCurator.create(o);
-        return o;
+        return this.createOwner("Test Owner " + TestUtil.randomInt());
+    }
+
+    protected Owner createOwner(String key) {
+        return this.createOwner(key, key);
+    }
+
+    protected Owner createOwner(String key, String name) {
+        Owner owner = TestUtil.createOwner(key, name);
+        this.ownerCurator.create(owner);
+
+        return owner;
+    }
+
+    protected Content createContent() {
+        String contentId = "test-content-" + TestUtil.randomInt();
+        return this.createContent(contentId, contentId);
+    }
+
+    protected Content createContent(String id, String name) {
+        Content content = TestUtil.createContent(id, name);
+        content = this.contentCurator.create(content);
+
+        return content;
     }
 
     protected Consumer createConsumer(Owner owner) {
-        ConsumerType type = new ConsumerType("test-consumer-type-" +
-            TestUtil.randomInt());
+        ConsumerType type = new ConsumerType("test-consumer-type-" + TestUtil.randomInt());
         consumerTypeCurator.create(type);
         Consumer c = new Consumer("test-consumer", "test-user", owner, type);
         consumerCurator.create(c);
+
         return c;
     }
 
@@ -271,20 +326,33 @@ public class DatabaseTestFixture {
         return TestUtil.createActivationKey(owner, null);
     }
 
-    protected Entitlement createEntitlement(Owner owner, Consumer consumer,
-        Pool pool, EntitlementCertificate cert) {
+    protected Entitlement createEntitlement(Owner owner, Consumer consumer, Pool pool,
+        EntitlementCertificate cert) {
+
         return TestUtil.createEntitlement(owner, consumer, pool, cert);
     }
 
-    protected EntitlementCertificate createEntitlementCertificate(String key,
-        String cert) {
+    protected EntitlementCertificate createEntitlementCertificate(String key, String cert) {
         EntitlementCertificate toReturn = new EntitlementCertificate();
         CertificateSerial certSerial = new CertificateSerial(new Date());
         certSerialCurator.create(certSerial);
         toReturn.setKeyAsBytes(key.getBytes());
         toReturn.setCertAsBytes(cert.getBytes());
         toReturn.setSerial(certSerial);
+
         return toReturn;
+    }
+
+    protected Product createProduct(String id, String name) {
+        Product product = TestUtil.createProduct(id, name);
+
+        return this.createProduct(product);
+    }
+
+    protected Product createProduct(Product product) {
+        product = this.productCurator.create(product);
+
+        return product;
     }
 
     protected Principal setupPrincipal(Owner owner, Access role) {

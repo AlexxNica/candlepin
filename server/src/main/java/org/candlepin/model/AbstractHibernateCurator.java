@@ -433,8 +433,12 @@ public abstract class AbstractHibernateCurator<E extends Persisted> {
 
     }
 
-    public void refresh(E object) {
-        getEntityManager().refresh(object);
+    public void refresh(E... entities) {
+        EntityManager entityManager = this.getEntityManager();
+
+        for (E entity : entities) {
+            entityManager.refresh(entity);
+        }
     }
 
     public void evict(E object) {
@@ -451,6 +455,7 @@ public abstract class AbstractHibernateCurator<E extends Persisted> {
         if (toIndex > results.size()) {
             toIndex = results.size();
         }
+
         // sublist returns a portion of the list between the specified fromIndex,
         // inclusive, and toIndex, exclusive.
         return results.subList(fromIndex, toIndex);

@@ -18,6 +18,7 @@ import org.candlepin.common.paging.Page;
 import org.candlepin.common.paging.PageRequest;
 import org.candlepin.service.ProductServiceAdapter;
 
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
@@ -38,6 +39,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.Query;
+
+
 
 /**
  * EntitlementCurator
@@ -563,6 +568,123 @@ public class EntitlementCurator extends AbstractHibernateCurator<Entitlement> {
         criteria.createAlias("pool", "p");
         filters.applyTo(criteria);
         return listByCriteria(criteria, pageRequest);
+    }
+
+    /**
+     * Marks all dependent entitlements of the given entitlements dirty, excluding those specified
+     * as input. The result is the number of entitlements marked dirty by this operation.
+     *
+     * @param entitlements
+     *  The collection of entitlements for which to mark dependent entitlements dirty
+     *
+     * @return
+     *  the number of entitlements marked dirty as a result of this operation
+     */
+    public int markDependentEntitlementsDirty(Iterable<Entitlement> entitlements) {
+        return this.markDependentEntitlementsDirty(entitlements, true);
+    }
+
+    /**
+     * Marks all dependent entitlements of the given entitlements dirty, returning the number of
+     * entitlements marked dirty as a result of this operation.
+     *
+     * @param entitlements
+     *  The collection of entitlements for which to mark dependent entitlements dirty
+     *
+     * @param excludeInput
+     *  Whether or not the input entitlements should be excluded from the set of dependent
+     *  entitlements
+     *
+     * @return
+     *  the number of entitlements marked dirty as a result of this operation
+     */
+    public int markDependentEntitlementsDirty(Iterable<Entitlement> entitlements, boolean excludeInput) {
+        if (entitlements != null && entitlements.iterator().hasNext()) {
+            Set<String> entitlementIds = new HashSet<String>();
+
+            // Deduplicate our entitlement IDs, discarding null/incomplete entitlements
+            for (Entitlement entitlement : entitlements) {
+                // TODO: Should we throw an exception if we find a malformed/incomplete entitlement
+                // or just continue silently ignoring them?
+                if (entitlement != null && entitlement.getId() != null) {
+                    entitlementIds.add(entitlement.getId());
+                }
+            }
+
+            // Impl note:
+            // We do this in direct SQL, as it lets us take a sane path from base to dependent
+            // entitlements, rather than the lunacy that would be required with HQL, JPQL or
+            // CriteriaBuilder.
+            String querySql = "SELECT DISTINCT e2.id " +
+                // Required entitlement
+                "FROM cp_entitlement e1 " +
+                // Required entitlement => required pool
+                "JOIN cp_pool_products ppp1 ON ppp1.pool_id = e1.pool_id " +
+                // Required pool => required product
+                "JOIN cp_product p ON p.id = ppp1.product_id " +
+                // Required product => conditional content
+                "JOIN cp_content_modified_products cmp ON cmp.element = p.id " +
+                // Conditional content => dependent product
+                "JOIN cp_product_content pc ON pc.content_id = cmp.cp_content_id " +
+                // Dependent product => dependent pool
+                "JOIN cp_pool_products ppp2 ON ppp2.product_id = pc.product_id " +
+                // Dependent pool => dependent entitlement
+                "JOIN cp_entitlement e2 ON e2.pool_id = ppp2.pool_id " +
+                "WHERE e1.consumer_id = e2.consumer_id " +
+                "  AND ppp1.dtype = 'provided' " +
+                "  AND ppp2.dtype = 'provided' " +
+                "  AND e1.id != e2.id " +
+                "  AND e2.dirty = false " +
+                "  AND e1.id IN (:entitlement_ids)";
+
+            if (excludeInput) {
+                querySql += " AND e2.id NOT IN (:entitlement_ids)";
+            }
+
+            Query query = this.getEntityManager().createNativeQuery(querySql);
+            Set<String> dirtyIds = new HashSet<String>();
+
+            int blockSize = Math.min(IN_OPERATOR_BLOCK_SIZE, QUERY_PARAMETER_LIMIT / (excludeInput ? 2 : 1));
+
+            // We repeat the query for each block, as it's ~30% faster than adding more in blocks
+            // to the query. Also, considerably less complex.
+            for (List<String> block : Iterables.partition(entitlementIds, blockSize)) {
+                query.setParameter("entitlement_ids", block);
+                dirtyIds.addAll(query.getResultList());
+            }
+
+            // Update the affected entitlements, if necessary...
+            if (dirtyIds.size() > 0) {
+                return this.markEntitlementsDirty(dirtyIds);
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Marks the given entitlements as dirty; forcing a regeneration the next time it is requested.
+     *
+     * @param entitlementIds
+     *  A collection of IDs of the entitlements to mark dirty
+     *
+     * @return
+     *  The number of certificates updated
+     */
+    @Transactional
+    public int markEntitlementsDirty(Iterable<String> entitlementIds) {
+        int count = 0;
+
+        if (entitlementIds != null && entitlementIds.iterator().hasNext()) {
+            String hql = "UPDATE Entitlement SET dirty = true WHERE id IN (:entIds)";
+            Query query = this.getEntityManager().createQuery(hql);
+
+            for (List<String> block : Iterables.partition(entitlementIds, IN_OPERATOR_BLOCK_SIZE)) {
+                count += query.setParameter("entIds", block).executeUpdate();
+            }
+        }
+
+        return count;
     }
 
 }
