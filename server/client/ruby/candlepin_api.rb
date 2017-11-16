@@ -529,6 +529,8 @@ class Candlepin
       end
     end
 
+    sleep 1
+
     # If we only have one job detail, return the status directly; otherwise return a collection of job results
     return (status.length == 1 ? status[0]['result'] : status.map {|detail| detail['result']})
   end

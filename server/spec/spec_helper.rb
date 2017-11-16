@@ -1,8 +1,11 @@
 require 'base64'
 require 'zip'
+require 'hostedtest_api'
 
 
 module CleanupHooks
+  include HostedTest
+
   def cleanup_before
     @cp = Candlepin.new('admin', 'admin')
     @owners = []
@@ -26,12 +29,8 @@ module CleanupHooks
       @cp.delete_rules
     end
 
-    if !@cp.get_status()['standalone']
-      begin
-        @cp.delete('/hostedtest/subscriptions/', {}, nil, true)
-      rescue RestClient::ResourceNotFound
-        puts "skipping hostedtest cleanup"
-      end
+    if is_hosted?
+      clear_upstream_data
     end
   end
 end
