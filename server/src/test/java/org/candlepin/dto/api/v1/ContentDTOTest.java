@@ -14,15 +14,10 @@
  */
 package org.candlepin.dto.api.v1;
 
-import static org.junit.Assert.*;
-
 import org.candlepin.dto.AbstractDTOTest;
-
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 
@@ -50,6 +45,8 @@ public class ContentDTOTest extends AbstractDTOTest<ContentDTO> {
         this.values.put("GpgUrl", "test_value");
         this.values.put("MetadataExpire", 1234L);
         this.values.put("ModifiedProductIds", Arrays.asList("1", "2", "3"));
+        this.values.put("removeModifiedProductId", "blah");
+        this.values.put("addModifiedProductId", "blah");
         this.values.put("Arches", "test_value");
         this.values.put("Locked", Boolean.TRUE);
     }
@@ -69,63 +66,5 @@ public class ContentDTOTest extends AbstractDTOTest<ContentDTO> {
     protected Object getOutputValueForAccessor(String field, Object input) {
         // Nothing to do here
         return input;
-    }
-
-    @Test
-    public void testAddModifiedProducts() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.addModifiedProductId("3");
-        assertEquals(new HashSet(Arrays.asList("1", "2", "3")), dto.getModifiedProductIds());
-    }
-
-    @Test
-    public void testAddModifiedProductsNoChange() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.addModifiedProductId("2");
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddModifiedProductsWithNullValue() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.addModifiedProductId(null);
-    }
-
-    @Test
-    public void testRemoveModifiedProducts() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.removeModifiedProductId("3");
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-    }
-
-    @Test
-    public void testRemoveModifiedProductsNoChange() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.removeModifiedProductId("3");
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testRemoveModifiedProductsWithNullValue() {
-        ContentDTO dto = new ContentDTO();
-        dto.setModifiedProductIds(Arrays.asList("1", "2"));
-        assertEquals(new HashSet(Arrays.asList("1", "2")), dto.getModifiedProductIds());
-
-        dto.removeModifiedProductId(null);
     }
 }

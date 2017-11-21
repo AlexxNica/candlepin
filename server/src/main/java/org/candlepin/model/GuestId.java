@@ -19,6 +19,7 @@ import org.candlepin.common.jackson.HateoasInclude;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ForeignKey;
@@ -112,7 +113,9 @@ public class GuestId extends AbstractHibernateObject implements Owned, Named, Co
 
     public GuestId(String guestId, Consumer consumer, Map<String, String> attributes) {
         this(guestId, consumer);
-        this.setAttributes(attributes);
+        if (attributes != null) {
+            this.setAttributes(attributes);
+        }
     }
 
     @HateoasInclude
@@ -163,10 +166,12 @@ public class GuestId extends AbstractHibernateObject implements Owned, Named, Co
         if (!(other instanceof GuestId)) {
             return false;
         }
+
         GuestId that = (GuestId) other;
-        if (this.getGuestId().equalsIgnoreCase(that.getGuestId()) &&
-            this.getAttributes().equals(that.getAttributes())) {
-            return true;
+        if (this.getGuestId().equalsIgnoreCase(that.getGuestId())) {
+            EqualsBuilder builder = new EqualsBuilder()
+                .append(this.getAttributes(), that.getAttributes());
+            return builder.isEquals();
         }
         return false;
     }

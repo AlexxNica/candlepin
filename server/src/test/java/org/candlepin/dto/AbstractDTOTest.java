@@ -19,14 +19,13 @@ import static org.junit.Assume.*;
 
 import org.candlepin.util.Util;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -50,6 +49,8 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
     protected final Class<T> dtoClass;
     protected final Map<String, Method[]> fields;
     protected final Constructor<T> copyConstructor;
+    protected final Map<String, Method> addToCollectionMethods;
+    protected final Map<String, Method> removeFromCollectionMethods;
 
     public AbstractDTOTest(Class<T> dtoClass) {
         if (dtoClass == null) {
@@ -58,6 +59,8 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
 
         this.dtoClass = dtoClass;
         this.fields = new HashMap<String, Method[]>();
+        this.addToCollectionMethods = new HashMap<String, Method>();
+        this.removeFromCollectionMethods = new HashMap<String, Method>();
 
         // Scan for accessor/mutator pairs to test
         for (Method method : this.dtoClass.getMethods()) {
@@ -66,8 +69,10 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
                 if (matcher.matches() && method.getParameterTypes().length == 0) {
                     String fieldName = matcher.group(1);
                     Method mutator = this.dtoClass.getMethod("set" + fieldName, method.getReturnType());
-
                     fields.put(fieldName, new Method[] { method, mutator });
+
+                    addCollectionMethod(dtoClass, fieldName, "add", addToCollectionMethods);
+                    addCollectionMethod(dtoClass, fieldName, "remove", removeFromCollectionMethods);
                 }
             }
             catch (NoSuchMethodException e) {
@@ -94,6 +99,16 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
         }
         catch (Exception e) {
             throw new RuntimeException("Unable to instantiate DTO test instance", e);
+        }
+    }
+
+    public void addCollectionMethod(Class<T> dtoClass, String field, String prefix,
+        Map<String, Method> methodMap) {
+        String singularFieldName = field.substring(0, field.length() - 1);
+        for (Method method : dtoClass.getMethods()) {
+            if (method.getName().contentEquals(prefix + singularFieldName)) {
+                methodMap.put(field, method);
+            }
         }
     }
 
@@ -134,6 +149,10 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
         return this.fields.keySet().toArray();
     }
 
+    public Object[] getCollectionFieldNames() {
+        return this.addToCollectionMethods.keySet().toArray();
+    }
+
     /**
      * Fetches the value that should be returned for the given field. This value will be passed,
      * unmodified, to the mutator for the given field.
@@ -147,6 +166,11 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
      *  the value to pass to the mutator
      */
     protected abstract Object getInputValueForMutator(String field);
+
+    protected Object getInputValueForMutator(String method, String field) {
+        Object value = getInputValueForMutator(method);
+        return value == null ? getInputValueForMutator(field) : value;
+    }
 
     /**
      * Fetches the value that should be returned by the accessor for the given field. In general,
@@ -481,5 +505,93 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
             }
 
         }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    @Parameters(method = "getCollectionFieldNames")
+    public void testAddNullToCollection(String field) throws Exception {
+        Method method = this.addToCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+        method.invoke(dto, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    @Parameters(method = "getCollectionFieldNames")
+    public void testRemoveNullFromCollection(String field) throws Exception {
+        Method method = this.removeFromCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+        method.invoke(dto, null);
+    }
+
+    @Test
+    @Parameters(method = "getCollectionFieldNames")
+    public void testAddToEmptyCollection(String field) throws Exception {
+        Method method = this.addToCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+        Object input = this.getInputValueForMutator(method.getName(), field);
+        assertTrue((Boolean) method.invoke(dto, input));
+
+        Method[] methods = this.fields.get(field);
+        Collection result = (Collection) methods[0].invoke(dto);
+        assertEquals(1, result.size());
+        assertEquals(input, result.iterator().next());
+    }
+
+    @Test
+    @Parameters(method = "getCollectionFieldNames")
+    public void testAddDuplicateToCollection(String field) throws Exception {
+        Method method = this.addToCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+        Object input = this.getInputValueForMutator(method.getName(), field);
+        Method[] methods = this.fields.get(field);
+
+        // first add should add to the collection
+        assertTrue((Boolean) method.invoke(dto, input));
+        Collection result = (Collection) methods[0].invoke(dto);
+        assertEquals(1, result.size());
+        assertEquals(input, result.iterator().next());
+
+        // second add should make no change
+        assertFalse((Boolean) method.invoke(dto, input));
+        result = (Collection) methods[0].invoke(dto);
+        assertEquals(1, result.size());
+        assertEquals(input, result.iterator().next());
+    }
+
+    @Test
+    @Parameters(method = "getCollectionFieldNames")
+    public void testRemoveFromCollectionWhenElementIsPresent(String field) throws Exception {
+        Method addMethod = this.addToCollectionMethods.get(field);
+        Method removeMethod = this.removeFromCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+
+        Method[] methods = this.fields.get(field);
+
+        // add an object first
+        Object addInput = this.getInputValueForMutator(addMethod.getName(), field);
+        assertTrue((Boolean) addMethod.invoke(dto, addInput));
+        assertEquals(1, ((Collection) methods[0].invoke(dto)).size());
+
+        // remove the same and verify collection is empty
+        Object removeInput = this.getInputValueForMutator(removeMethod.getName(), field);
+        assertTrue((Boolean) removeMethod.invoke(dto, removeInput));
+        assertEquals(0, ((Collection) methods[0].invoke(dto)).size());
+    }
+
+    @Test
+    @Parameters(method = "getCollectionFieldNames")
+    public void testRemoveFromCollectionWhenElementIsAbsent(String field) throws Exception {
+        Method removeMethod = this.removeFromCollectionMethods.get(field);
+        T dto = this.getDTOInstance();
+
+        Method[] methods = this.fields.get(field);
+        Object input = this.getInputValueForMutator(field);
+        methods[1].invoke(dto, input);
+        int size = ((Collection) methods[0].invoke(dto)).size();
+
+        // verify removing a different element has no change
+        Object removeInput = this.getInputValueForMutator(removeMethod.getName(), field);
+        assertFalse((Boolean) removeMethod.invoke(dto, removeInput));
+        assertEquals(size, ((Collection) methods[0].invoke(dto)).size());
     }
 }

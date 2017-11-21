@@ -20,7 +20,10 @@ import org.candlepin.auth.Access;
 import org.candlepin.auth.UserPrincipal;
 import org.candlepin.auth.permissions.OwnerPermission;
 import org.candlepin.auth.permissions.Permission;
+import org.candlepin.dto.api.v1.ConsumerDTO;
+import org.candlepin.dto.api.v1.ConsumerTypeDTO;
 import org.candlepin.dto.api.v1.ContentDTO;
+import org.candlepin.dto.api.v1.OwnerDTO;
 import org.candlepin.dto.api.v1.ProductDTO;
 import org.candlepin.dto.api.v1.ProductDTO.ProductContentDTO;
 import org.candlepin.model.Branding;
@@ -92,6 +95,9 @@ public class TestUtil {
 
     public static Consumer createConsumer(ConsumerType type, Owner owner) {
         return new Consumer("TestConsumer" + randomInt(), "User", owner, type);
+    }
+    public static ConsumerDTO createConsumerDTO(ConsumerTypeDTO type, OwnerDTO owner) {
+        return new ConsumerDTO("TestConsumer" + randomInt(), "User", owner, type);
     }
 
     public static Consumer createConsumer(ConsumerType type, Owner owner, String username) {

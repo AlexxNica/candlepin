@@ -14,6 +14,9 @@
  */
 package org.candlepin.dto.api.v1;
 
+import org.candlepin.common.jackson.HateoasInclude;
+
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -22,12 +25,17 @@ import io.swagger.annotations.ApiModel;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A DTO representation of the Owner entity
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.PROPERTY)
 @ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing an owner/organization")
+@JsonFilter("OwnerFilter")
 public class OwnerDTO extends TimestampedCandlepinDTO<OwnerDTO> implements LinkableDTO {
     public static final long serialVersionUID = 1L;
 
@@ -61,6 +69,29 @@ public class OwnerDTO extends TimestampedCandlepinDTO<OwnerDTO> implements Linka
         super(source);
     }
 
+    /**
+     * Constructor with required parameters.
+     *
+     * @param key Owner's unique identifier
+     * @param displayName Owner's name - suitable for UI
+     */
+    public OwnerDTO(String key, String displayName) {
+        this();
+
+        this.key = key;
+        this.displayName = displayName;
+    }
+
+    /**
+     * Creates an Owner with only a name
+     *
+     * @param name to be used for both the display name and the key
+     */
+    public OwnerDTO(String name) {
+        this(name, name);
+    }
+
+    @HateoasInclude
     public String getId() {
         return this.id;
     }
@@ -70,6 +101,7 @@ public class OwnerDTO extends TimestampedCandlepinDTO<OwnerDTO> implements Linka
         return this;
     }
 
+    @HateoasInclude
     public String getKey() {
         return key;
     }
@@ -79,6 +111,7 @@ public class OwnerDTO extends TimestampedCandlepinDTO<OwnerDTO> implements Linka
         return this;
     }
 
+    @HateoasInclude
     public String getDisplayName() {
         return displayName;
     }
@@ -174,6 +207,7 @@ public class OwnerDTO extends TimestampedCandlepinDTO<OwnerDTO> implements Linka
      * {@inheritDoc}
      */
     @Override
+    @HateoasInclude
     public String getHref() {
         // TODO: When/if we ever version our API, we should change this to use the owner ID rather
         // than the key. We're really inconsistent with how we address owners.

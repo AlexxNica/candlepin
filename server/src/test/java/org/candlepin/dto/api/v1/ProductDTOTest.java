@@ -73,6 +73,9 @@ public class ProductDTOTest extends AbstractDTOTest<ProductDTO> {
         this.values.put("Locked", Boolean.TRUE);
         this.values.put("ProductContent", productContent);
         this.values.put("Attributes", attributes);
+        this.values.put("DependentProductIds", Arrays.asList("1", "2", "3"));
+        this.values.put("addDependentProductId", "blah");
+        this.values.put("removeDependentProductId", "blah");
     }
 
     /**

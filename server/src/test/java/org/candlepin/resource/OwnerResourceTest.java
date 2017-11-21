@@ -52,6 +52,7 @@ import org.candlepin.controller.ManifestManager;
 import org.candlepin.controller.OwnerManager;
 import org.candlepin.controller.ProductManager;
 import org.candlepin.dto.api.v1.ActivationKeyDTO;
+import org.candlepin.dto.api.v1.ConsumerDTO;
 import org.candlepin.dto.api.v1.OwnerDTO;
 import org.candlepin.dto.api.v1.UpstreamConsumerDTO;
 import org.candlepin.model.CandlepinQuery;
@@ -719,11 +720,11 @@ public class OwnerResourceTest extends DatabaseTestFixture {
         types.add("type");
         consumerTypeCurator.create(new ConsumerType("type"));
 
-        CandlepinQuery<Consumer> result = ownerResource.listConsumers(
+        CandlepinQuery<ConsumerDTO> result = ownerResource.listConsumers(
             owner.getKey(), "username", types, uuids, null, null, null, null, null, new PageRequest());
 
         assertNotNull(result);
-        List<Consumer> consumers = result.list();
+        List<ConsumerDTO> consumers = result.list();
 
         assertEquals(0, consumers.size());
     }
@@ -742,11 +743,11 @@ public class OwnerResourceTest extends DatabaseTestFixture {
         setupPrincipal(owner, Access.ALL);
         securityInterceptor.enable();
 
-        CandlepinQuery<Consumer> result = ownerResource.listConsumers(
+        CandlepinQuery<ConsumerDTO> result = ownerResource.listConsumers(
             owner.getKey(), null, null, uuids, null, null, null, null, null, null);
 
         assertNotNull(result);
-        List<Consumer> consumers = result.list();
+        List<ConsumerDTO> consumers = result.list();
 
         assertEquals(1, consumers.size());
     }
@@ -779,11 +780,11 @@ public class OwnerResourceTest extends DatabaseTestFixture {
         setupPrincipal(owner, Access.ALL);
         securityInterceptor.enable();
 
-        CandlepinQuery<Consumer> result = ownerResource.listConsumers(
+        CandlepinQuery<ConsumerDTO> result = ownerResource.listConsumers(
             owner.getKey(), null, null, uuids, null, null, null, null, null, null);
 
         assertNotNull(result);
-        List<Consumer> consumers = result.list();
+        List<ConsumerDTO> consumers = result.list();
 
         assertEquals(2, consumers.size());
     }
@@ -843,7 +844,6 @@ public class OwnerResourceTest extends DatabaseTestFixture {
         Pool returnedPool = pools.get(0);
         assertNotNull(returnedPool.getCalculatedAttributes());
     }
-
 
     @Test(expected = NotFoundException.class)
     public void testConsumerListPoolsCannotAccessOtherConsumer() {
