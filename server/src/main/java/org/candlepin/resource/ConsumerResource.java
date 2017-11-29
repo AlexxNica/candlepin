@@ -75,6 +75,7 @@ import org.candlepin.model.Owner;
 import org.candlepin.model.OwnerCurator;
 import org.candlepin.model.OwnerProductCurator;
 import org.candlepin.model.Pool;
+import org.candlepin.model.Pool.Attributes;
 import org.candlepin.model.PoolQuantity;
 import org.candlepin.model.Release;
 import org.candlepin.model.User;
@@ -1350,6 +1351,11 @@ public class ConsumerResource {
         for (Entitlement entitlement : guest.getEntitlements()) {
             Pool pool = entitlement.getPool();
 
+            log.debug("Pool is {}", pool);
+            log.debug("Requires Host is {}", pool.hasAttribute(Attributes.REQUIRES_HOST));
+            log.debug("Is unmapped guest is {}", pool.isUnmappedGuestPool());
+            log.debug("Is virt only is {}", isVirtOnly(pool));
+
             // If there is no host required or the pool isn't for unmapped guests, skip it
             if (!(pool.hasAttribute(Pool.Attributes.REQUIRES_HOST) || pool.isUnmappedGuestPool() ||
                 isVirtOnly(pool))) {
@@ -1358,6 +1364,12 @@ public class ConsumerResource {
 
             if (pool.hasAttribute(Pool.Attributes.REQUIRES_HOST)) {
                 String requiredHost = getRequiredHost(pool);
+                log.debug("Required host is {}", requiredHost);
+                log.debug("Host is {}", host);
+                if (host != null) {
+                    log.debug("Host UUID is {}", host.getUuid());
+                    log.debug("Condition is {}", !requiredHost.equals(host.getUuid()));
+                }
                 if (host != null && !requiredHost.equals(host.getUuid())) {
                     log.debug("Removing entitlement {} from guest {} due to host mismatch.",
                         entitlement.getId(), guest.getUuid());

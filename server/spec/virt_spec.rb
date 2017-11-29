@@ -198,6 +198,9 @@ describe 'Standalone Virt-Limit Subscriptions', :type => :virt do
 
   # Covers BZ 1379849
   it 'should revoke guest entitlements when migration happens' do
+    @cp.put("/owners/#{@owner['key']}/log")
+    puts "Logging owner #{@owner['key']}"
+
     #New hypervisor
     host3 = @user.register(random_string('host'), :system, nil,
       {}, nil, nil, [], [])
