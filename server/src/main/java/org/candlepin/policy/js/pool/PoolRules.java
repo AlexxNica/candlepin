@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -562,8 +563,18 @@ public class PoolRules {
             !currentProvided.equals(incomingProvided);
 
         // Check if the existing product is in the set of changed products
-        if (!productsChanged && changedProducts != null && pid != null) {
-            productsChanged = (changedProducts.get(pid) != null);
+        if (!productsChanged && changedProducts != null) {
+            if (pid != null) {
+                productsChanged = (changedProducts.get(pid) != null);
+            }
+            Iterator<Product> providedProductsIter = existingPool.getProvidedProducts().iterator();
+
+            while (!productsChanged && providedProductsIter.hasNext()) {
+                Product pp = providedProductsIter.next();
+                if (pp != null && pp.getId() != null) {
+                    productsChanged = (changedProducts.get(pp.getId()) != null);
+                }
+            }
         }
 
         if (productsChanged) {
