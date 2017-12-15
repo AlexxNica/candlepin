@@ -32,6 +32,7 @@ import org.candlepin.common.exceptions.NotFoundException;
 import org.candlepin.config.CandlepinCommonTestConfig;
 import org.candlepin.controller.Entitler;
 import org.candlepin.controller.PoolManager;
+import org.candlepin.dto.ModelTranslator;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCapability;
 import org.candlepin.model.ConsumerCurator;
@@ -75,6 +76,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.xnap.commons.i18n.I18n;
 import org.xnap.commons.i18n.I18nFactory;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -113,6 +115,7 @@ public class ConsumerResourceUpdateTest {
     private ConsumerResource resource;
     private Provider<GuestMigration> migrationProvider;
     private GuestMigration testMigration;
+    @Inject protected ModelTranslator modelTranslator;
 
     @Before
     public void init() throws Exception {
@@ -130,7 +133,7 @@ public class ConsumerResourceUpdateTest {
             this.activationKeyCurator, this.entitler, this.complianceRules,
             this.deletedConsumerCurator, this.environmentCurator, null,
             config, null, null, null, this.consumerBindUtil,
-            null, null, new FactValidator(config, this.i18n), null, consumerEnricher, migrationProvider);
+            null, null, new FactValidator(config, this.i18n), null, consumerEnricher, migrationProvider, modelTranslator);
 
         when(complianceRules.getStatus(any(Consumer.class), any(Date.class), any(Boolean.class),
             any(Boolean.class))).thenReturn(new ComplianceStatus(new Date()));

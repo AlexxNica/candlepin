@@ -34,6 +34,7 @@ import org.candlepin.common.config.MapConfiguration;
 import org.candlepin.common.exceptions.BadRequestException;
 import org.candlepin.common.exceptions.ForbiddenException;
 import org.candlepin.config.ConfigProperties;
+import org.candlepin.dto.ModelTranslator;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerContentOverrideCurator;
 import org.candlepin.model.ConsumerCurator;
@@ -76,6 +77,7 @@ import org.mockito.stubbing.Answer;
 import org.xnap.commons.i18n.I18n;
 import org.xnap.commons.i18n.I18nFactory;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -116,6 +118,7 @@ public class ConsumerResourceCreationTest {
     @Mock private ServiceLevelValidator serviceLevelValidator;
     @Mock private ConsumerBindUtil consumerBindUtil;
     @Mock private ConsumerEnricher consumerEnricher;
+    @Inject protected ModelTranslator modelTranslator;
 
     private I18n i18n;
 
@@ -125,7 +128,6 @@ public class ConsumerResourceCreationTest {
     protected Owner owner;
     protected Role role;
     private User user;
-
     private GuestMigration testMigration;
     private Provider<GuestMigration> migrationProvider;
 
@@ -142,7 +144,7 @@ public class ConsumerResourceCreationTest {
             null, this.idCertService, null, this.i18n, this.sink, null, null, null, this.userService, null,
             null, this.ownerCurator, this.activationKeyCurator, null, this.complianceRules,
             this.deletedConsumerCurator, null, null, this.config, null, null, null, this.consumerBindUtil,
-            null, null, new FactValidator(this.config, this.i18n), null, consumerEnricher, migrationProvider);
+            null, null, new FactValidator(this.config, this.i18n), null, consumerEnricher, migrationProvider, modelTranslator);
 
         this.system = initSystem();
 

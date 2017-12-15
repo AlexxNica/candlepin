@@ -33,6 +33,7 @@ import org.candlepin.auth.UserPrincipal;
 import org.candlepin.common.config.Configuration;
 import org.candlepin.common.exceptions.BadRequestException;
 import org.candlepin.config.CandlepinCommonTestConfig;
+import org.candlepin.dto.ModelTranslator;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCurator;
 import org.candlepin.model.ConsumerType;
@@ -70,6 +71,7 @@ import org.mockito.stubbing.Answer;
 import org.xnap.commons.i18n.I18n;
 import org.xnap.commons.i18n.I18nFactory;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -105,6 +107,8 @@ public class HypervisorResourceTest {
     private I18n i18n;
     private ConsumerType hypervisorType;
     private HypervisorResource hypervisorResource;
+    @Inject
+    protected ModelTranslator modelTranslator;
 
     private Provider<GuestMigration> migrationProvider;
     private GuestMigration testMigration;
@@ -125,7 +129,7 @@ public class HypervisorResourceTest {
             this.activationKeyCurator, null, this.complianceRules,
             this.deletedConsumerCurator, null, null, config,
             null, null, null, this.consumerBindUtil, null, null,
-            new FactValidator(config, this.i18n), null, consumerEnricher, migrationProvider);
+            new FactValidator(config, this.i18n), null, consumerEnricher, migrationProvider, modelTranslator);
 
         hypervisorResource = new HypervisorResource(consumerResource,
             consumerCurator, i18n, ownerCurator, migrationProvider);

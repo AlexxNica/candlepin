@@ -25,6 +25,9 @@ import org.candlepin.common.exceptions.NotFoundException;
 import org.candlepin.common.paging.Page;
 import org.candlepin.common.paging.PageRequest;
 import org.candlepin.controller.PoolManager;
+import org.candlepin.dto.ModelTranslator;
+import org.candlepin.dto.api.v1.EntitlementDTO;
+import org.candlepin.dto.api.v1.PoolDTO;
 import org.candlepin.model.Cdn;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCurator;
@@ -84,16 +87,19 @@ public class PoolResource {
     private I18n i18n;
     private PoolManager poolManager;
     private CalculatedAttributesUtil calculatedAttributesUtil;
+    private ModelTranslator translator;
 
     @Inject
     public PoolResource(ConsumerCurator consumerCurator, OwnerCurator ownerCurator,
-        I18n i18n, PoolManager poolManager, CalculatedAttributesUtil calculatedAttributesUtil) {
+        I18n i18n, PoolManager poolManager, CalculatedAttributesUtil calculatedAttributesUtil,
+        ModelTranslator translator) {
 
         this.consumerCurator = consumerCurator;
         this.ownerCurator = ownerCurator;
         this.i18n = i18n;
         this.poolManager = poolManager;
         this.calculatedAttributesUtil = calculatedAttributesUtil;
+        this.translator = translator;
     }
 
     /**
@@ -114,7 +120,7 @@ public class PoolResource {
     @Wrapped(element = "pools")
     @Deprecated
     @SecurityHole
-    public List<Pool> list(@QueryParam("owner") String ownerId,
+    public List<PoolDTO> list(@QueryParam("owner") String ownerId,
         @QueryParam("consumer") String consumerUuid,
         @QueryParam("product") String productId,
         @ApiParam("Use with consumerUuid to list all pools available to the consumer. " +
@@ -186,7 +192,12 @@ public class PoolResource {
 
         // Store the page for the LinkHeaderResponseFilter
         ResteasyProviderFactory.pushContext(Page.class, page);
-        return poolList;
+
+        List<PoolDTO> poolDTOs = new ArrayList<PoolDTO>();
+        for (Pool pool : poolList) {
+            poolDTOs.add(translator.translate(pool, PoolDTO.class));
+        }
+        return poolDTOs;
     }
 
     @ApiOperation(notes = "Retrieves a single Pool", value = "getPool")
@@ -195,7 +206,7 @@ public class PoolResource {
     @GET
     @Path("/{pool_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Pool getPool(@PathParam("pool_id") @Verify(Pool.class) String id,
+    public PoolDTO getPool(@PathParam("pool_id") @Verify(Pool.class) String id,
         @QueryParam("consumer") String consumerUuid,
         @ApiParam("Uses ISO 8601 format") @QueryParam("activeon") String activeOn,
         @Context Principal principal) {
@@ -224,7 +235,8 @@ public class PoolResource {
                 calculatedAttributesUtil.buildCalculatedAttributes(toReturn, activeOnDate)
             );
             calculatedAttributesUtil.setQuantityAttributes(toReturn, c, activeOnDate);
-            return toReturn;
+
+            return translator.translate(toReturn, PoolDTO.class);
         }
 
         throw new NotFoundException(i18n.tr(
@@ -275,7 +287,7 @@ public class PoolResource {
     @GET
     @Path("{pool_id}/entitlements")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Entitlement> getPoolEntitlements(@PathParam("pool_id")
+    public List<EntitlementDTO> getPoolEntitlements(@PathParam("pool_id")
         @Verify(value = Pool.class, subResource = SubResource.ENTITLEMENTS) String id,
         @Context Principal principal) {
 
@@ -286,9 +298,11 @@ public class PoolResource {
                 "Subscription Pool with ID ''{0}'' could not be found.", id));
         }
 
-        List<Entitlement> entitlements = new ArrayList<Entitlement>();
-        entitlements.addAll(pool.getEntitlements());
-        return entitlements;
+        List<EntitlementDTO> entitlementDTOs = new ArrayList<EntitlementDTO>();
+        for (Entitlement entitlement : pool.getEntitlements()) {
+            entitlementDTOs.add(this.translator.translate(entitlement, EntitlementDTO.class));
+        }
+        return entitlementDTOs;
     }
 
     /**

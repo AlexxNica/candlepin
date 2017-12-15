@@ -27,6 +27,7 @@ import org.candlepin.common.exceptions.BadRequestException;
 import org.candlepin.common.exceptions.NotFoundException;
 import org.candlepin.common.paging.Page;
 import org.candlepin.common.paging.PageRequest;
+import org.candlepin.dto.ModelTranslator;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCurator;
 import org.candlepin.model.ConsumerType;
@@ -49,6 +50,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.xnap.commons.i18n.I18n;
 import org.xnap.commons.i18n.I18nFactory;
 
+import javax.inject.Inject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -76,6 +78,7 @@ public class GuestIdResourceTest {
     private Consumer consumer;
     private Owner owner;
     private ConsumerType ct;
+    @Inject protected ModelTranslator modelTranslator;
 
     private GuestMigration testMigration;
     private Provider<GuestMigration> migrationProvider;
@@ -278,7 +281,7 @@ public class GuestIdResourceTest {
         public ConsumerResourceForTesting() {
             super(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, consumerEnricher, null);
+                null, null, null, null, consumerEnricher, null, modelTranslator);
         }
 
         public void checkForMigration(Consumer host, Consumer guest) {
