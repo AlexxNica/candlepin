@@ -614,7 +614,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * <p></p>
      * Note that the collection returned by this method is a view of the collection backing this
      * set of attributes. Elements cannot be added to the collection, but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return the attributes associated with this pool, or null if they have not yet been defined.
      */
@@ -700,18 +700,18 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
     }
 
     /**
-     * Returns this pool's restricted username to use.
+     * Returns the username of the user to which this pool is restricted.
      *
-     * @return this pool's restricted username to use.
+     * @return the username of the user to which this pool is restricted.
      */
     public String getRestrictedToUsername() {
         return restrictedToUsername;
     }
 
     /**
-     * Sets this pool's restricted username to use.
+     * Sets the username of the user to which this pool is restricted.
      *
-     * @param restrictedToUsername this pool's restricted username to use.
+     * @param restrictedToUsername the username of the user to which this pool is restricted.
      *
      * @return a reference to this PoolDTO object.
      */
@@ -721,7 +721,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
     }
 
     /**
-     * Return the contract for this pool's subscription.
+     * Return the contract number for this pool's subscription.
      *
      * @return the contract number.
      */
@@ -730,7 +730,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
     }
 
     /**
-     * Sets the contract for this pool's subscription.
+     * Sets the contract number for this pool's subscription.
      *
      * @param contractNumber set the contract number of this subscription
      *
@@ -852,7 +852,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * <p></p>
      * Note that the collection returned by this method is a view of the collection backing this
      * set of branding items. Elements cannot be added to the collection, but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return
      *  the branding items associated with this key, or null if they have not yet been defined
@@ -881,8 +881,8 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
 
             for (BrandingDTO dto : branding) {
                 if (isNullOrIncomplete(dto)) {
-                    throw new IllegalArgumentException("collection contains null " +
-                        "or incomplete branding objects");
+                    throw new IllegalArgumentException(
+                        "collection contains null or incomplete branding objects");
                 }
             }
 
@@ -932,7 +932,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * <p></p>
      * Note that the collection returned by this method is a view of the collection backing this
      * set of calculated attributes. Elements cannot be added to the collection, but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return the calculated attributes associated with this pool,
      * or null if the they have not yet been defined.
@@ -1086,7 +1086,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * <p></p>
      * Note that the collection returned by this method is a view of the collection backing this
      * set of product attributes. Elements cannot be added to the collection, but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return the product attributes associated with this pool,
      * or null if they have not yet been defined.
@@ -1254,7 +1254,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * Note that the collection returned by this method is a view of the collection backing this
      * set of derived product attributes. Elements cannot be added to the collection,
      * but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return the derived product attributes associated with this pool,
      * or null if they have not yet been defined.
@@ -1341,7 +1341,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * <p></p>
      * Note that the collection returned by this method is a view of the collection backing this
      * set of provided products. Elements cannot be added to the collection, but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return
      *  the provided products associated with this key, or null if they have not yet been defined
@@ -1370,8 +1370,8 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
 
             for (ProvidedProductDTO dto : providedProducts) {
                 if (isNullOrIncomplete(dto)) {
-                    throw new IllegalArgumentException("collection contains null " +
-                        "or incomplete provided products");
+                    throw new IllegalArgumentException(
+                        "collection contains null or incomplete provided products");
                 }
             }
 
@@ -1412,7 +1412,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * Note that the collection returned by this method is a view of the collection backing this
      * set of derived provided products. Elements cannot be added to the collection,
      * but elements may be removed.
-     * Changes made to the collection will be reflected by this pool data instance.
+     * Changes made to the collection will be reflected by this pool DTO instance.
      *
      * @return
      *  the derived provided products associated with this key, or null if they have not yet been defined
@@ -1442,8 +1442,8 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
 
             for (ProvidedProductDTO dto : derivedProvidedProducts) {
                 if (isNullOrIncomplete(dto)) {
-                    throw new IllegalArgumentException("collection contains null or " +
-                        "incomplete derived provided products");
+                    throw new IllegalArgumentException(
+                        "collection contains null or incomplete derived provided products");
                 }
             }
 

@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -119,6 +120,7 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
      *
      * @return return the associated Consumer.
      */
+    //TODO: Replace with ConsumerDTO once that gets introduced.
     public Consumer getConsumer() {
         return consumer;
     }
@@ -130,6 +132,7 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
      *
      * @return a reference to this EntitlementDTO object.
      */
+    //TODO: Replace with ConsumerDTO once that gets introduced.
     public EntitlementDTO setConsumer(Consumer consumer) {
         this.consumer = consumer;
         return this;
@@ -319,8 +322,8 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
 
             for (CertificateDTO dto : certificates) {
                 if (isNullOrIncomplete(dto)) {
-                    throw new IllegalArgumentException("collection contains null " +
-                        "or incomplete certificates");
+                    throw new IllegalArgumentException(
+                        "collection contains null or incomplete certificates");
                 }
             }
             this.certificates.addAll(certificates);
@@ -443,14 +446,17 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
                 .append(this.getEndDate(), that.getEndDate())
                 .append(this.getStartDate(), that.getStartDate());
 
-            // As with many collections here, we need to explicitly check the elements ourselves,
-            // since it seems very common for collection implementations to not properly implement
-            // .equals
             // Note that we're using the boolean operator here as a shorthand way to skip checks
             // when the equality check has already failed.
             boolean equals = builder.isEquals();
 
-            equals = equals && Util.collectionsAreEqual(this.getCertificates(), that.getCertificates());
+            equals = equals && Util.collectionsAreEqual(this.getCertificates(), that.getCertificates(),
+                new Comparator<CertificateDTO>() {
+                    @Override
+                    public int compare(CertificateDTO c1, CertificateDTO c2) {
+                        return c1 == c2 || (c1 != null && c2.equals(c1)) ? 0 : 1;
+                    }
+                });
 
             return equals;
         }
