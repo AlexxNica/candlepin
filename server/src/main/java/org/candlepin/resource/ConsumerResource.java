@@ -493,8 +493,8 @@ public class ConsumerResource {
             entity.setServiceLevel(dto.getServiceLevel());
         }
 
-        if (dto.getReleaseVer() != null) {
-            entity.setReleaseVer(new Release(dto.getReleaseVer()));
+        if (dto.getReleaseVersion() != null) {
+            entity.setReleaseVer(new Release(dto.getReleaseVersion()));
         }
 
         if (dto.getEnvironment() != null) {

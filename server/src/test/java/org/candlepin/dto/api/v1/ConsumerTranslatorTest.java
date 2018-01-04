@@ -169,7 +169,7 @@ public class ConsumerTranslatorTest extends
 
             if (childrenGenerated) {
 
-                assertEquals(source.getReleaseVer().getReleaseVer(), dest.getReleaseVer());
+                assertEquals(source.getReleaseVer().getReleaseVer(), dest.getReleaseVersion());
                 this.ownerTranslatorTest.verifyOutput(source.getOwner(), dest.getOwner(), childrenGenerated);
                 this.environmentTranslatorTest.verifyOutput(source.getEnvironment(), dest.getEnvironment(),
                     childrenGenerated);
@@ -215,7 +215,7 @@ public class ConsumerTranslatorTest extends
                 }
             }
             else {
-                assertNull(dest.getReleaseVer());
+                assertNull(dest.getReleaseVersion());
                 assertNull(dest.getOwner());
                 assertNull(dest.getEnvironment());
                 assertNull(dest.getHypervisorId());

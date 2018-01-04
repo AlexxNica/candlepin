@@ -86,7 +86,7 @@ public class ConsumerTranslator extends
 
         Release release = source.getReleaseVer();
         if (release != null) {
-            dest.setReleaseVer(release.getReleaseVer());
+            dest.setReleaseVersion(release.getReleaseVer());
         }
 
         // Process nested objects if we have a ModelTranslator to use to the translation...
@@ -148,7 +148,7 @@ public class ConsumerTranslator extends
             dest.setIdCert(translator.translate(source.getIdCert(), CertificateDTO.class));
         }
         else {
-            dest.setReleaseVer(null);
+            dest.setReleaseVersion(null);
             dest.setOwner(null);
             dest.setEnvironment(null);
             dest.setInstalledProducts(null);

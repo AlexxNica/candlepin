@@ -94,7 +94,6 @@ public class CapabilityDTO extends TimestampedCandlepinDTO<CapabilityDTO> {
      */
     @Override
     public String toString() {
-
         return String.format(
             "CapabilityDTO [id: %s, name: %s]",
             this.getId(), this.getName());

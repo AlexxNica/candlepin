@@ -116,7 +116,6 @@ public class HypervisorIdDTO extends TimestampedCandlepinDTO<HypervisorIdDTO> {
      */
     @Override
     public String toString() {
-
         return String.format(
             "HypervisorIdDTO [id: %s, hypervisorId: %s, reporterId: %s]",
             this.getId(), this.getHypervisorId(), this.getReporterId());

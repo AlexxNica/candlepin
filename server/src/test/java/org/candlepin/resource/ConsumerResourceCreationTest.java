@@ -405,7 +405,7 @@ public class ConsumerResourceCreationTest {
     public void registerWithNullReleaseVer() {
         Principal p = new TrustedUserPrincipal("anyuser");
         ConsumerDTO consumer = new ConsumerDTO("consumername", null, null, systemDto);
-        consumer.setReleaseVer(null);
+        consumer.setReleaseVersion(null);
         resource.create(consumer, p, USER, owner.getKey(), null, true);
 
     }
@@ -414,7 +414,7 @@ public class ConsumerResourceCreationTest {
     public void registerWithEmptyReleaseVer() {
         Principal p = new TrustedUserPrincipal("anyuser");
         ConsumerDTO consumer = new ConsumerDTO("consumername", null, null, systemDto);
-        consumer.setReleaseVer("");
+        consumer.setReleaseVersion("");
         resource.create(consumer, p, USER, owner.getKey(), null, true);
     }
 

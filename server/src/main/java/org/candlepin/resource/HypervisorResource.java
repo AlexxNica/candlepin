@@ -240,8 +240,6 @@ public class HypervisorResource {
         return result;
     }
 
-
-
     @ApiOperation(notes = "Creates or Updates the list of Hypervisor hosts Allows agents such" +
         " as virt-who to update hosts' information . This is typically used when a host is" +
         " unable to register to candlepin via subscription manager. In situations where " +

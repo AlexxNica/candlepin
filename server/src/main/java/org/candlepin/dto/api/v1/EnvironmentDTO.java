@@ -173,7 +173,6 @@ public class EnvironmentDTO extends TimestampedCandlepinDTO<EnvironmentDTO> {
      */
     @Override
     public String toString() {
-
         return String.format(
             "EnvironmentDTO [id: %s, name: %s]",
             this.getId(), this.getName());

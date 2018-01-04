@@ -116,7 +116,6 @@ public class EnvironmentContentDTO extends TimestampedCandlepinDTO<EnvironmentCo
      */
     @Override
     public String toString() {
-
         String contentId = content != null ? content.getId() : null;
 
         return String.format(

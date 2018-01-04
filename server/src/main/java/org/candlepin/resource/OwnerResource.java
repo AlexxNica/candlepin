@@ -447,7 +447,6 @@ public class OwnerResource {
     }
 
     private Owner lookupOwnerFromDto(OwnerDTO ownerDto) {
-
         Owner owner = null;
         if (ownerDto.getId() != null) {
             // look up by ID
@@ -477,7 +476,6 @@ public class OwnerResource {
      *  if either entity or dto are null
      */
     protected void populateEntity(Environment entity, EnvironmentDTO dto) {
-
         if (entity == null) {
             throw new IllegalArgumentException("the environment model entity is null");
         }

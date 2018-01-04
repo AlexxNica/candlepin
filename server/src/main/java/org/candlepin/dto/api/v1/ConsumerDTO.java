@@ -272,7 +272,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     @JsonSerialize(using = ConsumerDTO.ReleaseVersionWrapSerializer.class,
         nullsUsing = ConsumerDTO.ReleaseVersionWrapSerializer.class)
     @JsonProperty("releaseVer")
-    public String getReleaseVer() {
+    public String getReleaseVersion() {
         return releaseVer;
     }
 
@@ -285,7 +285,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      */
     @JsonDeserialize(using = ConsumerDTO.ReleaseVersionWrapDeserializer.class)
     @JsonProperty("releaseVer")
-    public ConsumerDTO setReleaseVer(String releaseVer) {
+    public ConsumerDTO setReleaseVersion(String releaseVer) {
         this.releaseVer = releaseVer;
         return this;
     }
@@ -838,7 +838,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
                 .append(this.getUsername(), that.getUsername())
                 .append(this.getEntitlementStatus(), that.getEntitlementStatus())
                 .append(this.getServiceLevel(), that.getServiceLevel())
-                .append(this.getReleaseVer(), that.getReleaseVer())
+                .append(this.getReleaseVersion(), that.getReleaseVersion())
                 .append(thisOid, thatOid)
                 .append(thisEnvId, thatEnvId)
                 .append(this.getEntitlementCount(), that.getEntitlementCount())
@@ -867,7 +867,6 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      */
     @Override
     public int hashCode() {
-
         String oid = this.getOwner() != null ? this.getOwner().getId() : null;
         String envId = this.getEnvironment() != null ? this.getEnvironment().getId() : null;
         String hypervisorId = this.getHypervisorId() != null ? this.getHypervisorId().getId() : null;
@@ -880,7 +879,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
             .append(this.getUsername())
             .append(this.getEntitlementStatus())
             .append(this.getServiceLevel())
-            .append(this.getReleaseVer())
+            .append(this.getReleaseVersion())
             .append(oid)
             .append(envId)
             .append(this.getEntitlementCount())
@@ -961,7 +960,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
         this.setUsername(source.getUsername());
         this.setEntitlementStatus(source.getEntitlementStatus());
         this.setServiceLevel(source.getServiceLevel());
-        this.setReleaseVer(source.getReleaseVer());
+        this.setReleaseVersion(source.getReleaseVersion());
         this.setOwner(source.getOwner());
         this.setEnvironment(source.getEnvironment());
         this.setEntitlementCount(source.getEntitlementCount());

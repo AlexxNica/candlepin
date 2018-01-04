@@ -235,7 +235,6 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
      */
     @Override
     public String toString() {
-
         return String.format(
             "ConsumerInstalledProductDTO [id: %s, productId: %s, productName: %s]",
             this.getId(), this.getProductId(), this.getProductName());

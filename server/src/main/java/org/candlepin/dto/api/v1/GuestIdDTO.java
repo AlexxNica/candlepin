@@ -139,7 +139,6 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
      */
     @Override
     public String toString() {
-
         return String.format(
             "GuestIdDTO [id: %s, guestId: %s]",
             this.getId(), this.getGuestId());

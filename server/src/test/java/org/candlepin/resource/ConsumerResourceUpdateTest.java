@@ -190,26 +190,26 @@ public class ConsumerResourceUpdateTest {
     @Test
     public void nullReleaseVer() {
         ConsumerDTO consumer = getFakeConsumerDTO();
-        consumer.setReleaseVer(null);
+        consumer.setReleaseVersion(null);
 
         ConsumerDTO incoming = new ConsumerDTO();
-        incoming.setReleaseVer("not null");
+        incoming.setReleaseVersion("not null");
         this.resource.updateConsumer(consumer.getUuid(), incoming, principal);
 
         ConsumerDTO consumer2 = getFakeConsumerDTO();
-        consumer2.setReleaseVer("foo");
+        consumer2.setReleaseVersion("foo");
         ConsumerDTO incoming2 = new ConsumerDTO();
-        incoming2.setReleaseVer(null);
+        incoming2.setReleaseVersion(null);
         this.resource.updateConsumer(consumer2.getUuid(), incoming2, principal);
 
     }
 
     private void compareConsumerRelease(String release1, String release2, Boolean verify) {
         ConsumerDTO consumer = getFakeConsumerDTO();
-        consumer.setReleaseVer(release1);
+        consumer.setReleaseVersion(release1);
 
         ConsumerDTO incoming = new ConsumerDTO();
-        incoming.setReleaseVer(release2);
+        incoming.setReleaseVersion(release2);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         this.resource.updateConsumer(consumer.getUuid(), incoming, principal);
@@ -218,7 +218,7 @@ public class ConsumerResourceUpdateTest {
         if (verify) {
             verify(sink).queueEvent((Event) any());
         }
-        assertEquals(incoming.getReleaseVer(), mergedConsumer.getReleaseVer().getReleaseVer());
+        assertEquals(incoming.getReleaseVersion(), mergedConsumer.getReleaseVer().getReleaseVer());
     }
 
     @Test

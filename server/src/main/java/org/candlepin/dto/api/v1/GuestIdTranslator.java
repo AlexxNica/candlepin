@@ -53,7 +53,6 @@ public class GuestIdTranslator extends
      */
     @Override
     public GuestIdDTO populate(ModelTranslator translator, GuestId source, GuestIdDTO dest) {
-
         dest = super.populate(translator, source, dest);
 
         dest.setId(source.getId());
