@@ -27,6 +27,7 @@ import com.google.inject.persist.Transactional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
@@ -637,7 +638,8 @@ public class ConsumerCurator extends AbstractHibernateCurator<Consumer> {
             .createAlias("hypervisorId", "hvsr")
             .add(Restrictions.eq("o.key", ownerKey))
             .add(this.getHypervisorIdRestriction(hypervisorIds))
-            .addOrder(Order.asc("hvsr.hypervisorId"));
+            .addOrder(Order.asc("hvsr.hypervisorId"))
+            .setFetchMode("type", FetchMode.SELECT);
 
         return this.cpQueryFactory.<Consumer>buildQuery(this.currentSession(), criteria)
             .setLockMode(LockModeType.PESSIMISTIC_WRITE);
