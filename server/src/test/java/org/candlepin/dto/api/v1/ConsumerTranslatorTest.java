@@ -201,18 +201,7 @@ public class ConsumerTranslatorTest extends
                     assertTrue(verified);
                 }
 
-                for (GuestId guestId : source.getGuestIds()) {
-                    boolean verified = false;
-                    for (GuestIdDTO guestIdDTO : dest.getGuestIds()) {
-                        assertNotNull(guestId);
-                        assertNotNull(guestIdDTO);
-                        if (guestId.getId().contentEquals(guestIdDTO.getId())) {
-                            this.guestIdTranslatorTest.verifyOutput(guestId, guestIdDTO, childrenGenerated);
-                            verified = true;
-                        }
-                    }
-                    assertTrue(verified);
-                }
+                assertEquals(0, dest.getGuestIds().size());
             }
             else {
                 assertNull(dest.getReleaseVersion());

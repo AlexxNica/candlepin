@@ -14,10 +14,12 @@
  */
 package org.candlepin.dto.api.v1;
 
+import org.candlepin.util.SetView;
 import org.candlepin.util.Util;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import io.swagger.annotations.ApiModel;
 
@@ -153,7 +155,8 @@ public class EnvironmentDTO extends TimestampedCandlepinDTO<EnvironmentDTO> {
      * @return the environmentContent field of this EnvironmentDTO object.
      */
     public Set<EnvironmentContentDTO> getEnvironmentContent() {
-        return environmentContent;
+        return this.environmentContent != null ?
+            new SetView<EnvironmentContentDTO>(this.environmentContent) : null;
     }
 
     /**
@@ -164,7 +167,26 @@ public class EnvironmentDTO extends TimestampedCandlepinDTO<EnvironmentDTO> {
      * @return a reference to this DTO object.
      */
     public EnvironmentDTO setEnvironmentContent(Set<EnvironmentContentDTO> environmentContent) {
-        this.environmentContent = environmentContent;
+        if (environmentContent != null) {
+            if (this.environmentContent == null) {
+                this.environmentContent = new HashSet<EnvironmentContentDTO>();
+            }
+            else {
+                this.environmentContent.clear();
+            }
+
+            for (EnvironmentContentDTO dto : environmentContent) {
+                if (dto == null || dto.getContent() == null ||
+                    StringUtils.isEmpty(dto.getContent().getId())) {
+                    throw new IllegalArgumentException("environment content is null or incomplete");
+                }
+
+                this.environmentContent.add(new EnvironmentContentDTO(dto));
+            }
+        }
+        else {
+            this.environmentContent = null;
+        }
         return this;
     }
 
@@ -230,15 +252,9 @@ public class EnvironmentDTO extends TimestampedCandlepinDTO<EnvironmentDTO> {
     @Override
     public EnvironmentDTO clone() {
         EnvironmentDTO copy = super.clone();
-        copy.owner = owner != null ? (OwnerDTO) owner.clone() : null;
+        copy.owner = owner != null ? owner.clone() : null;
+        copy.setEnvironmentContent(this.getEnvironmentContent());
 
-        Set<EnvironmentContentDTO> environmentContentDTOSet = this.getEnvironmentContent();
-        if (environmentContentDTOSet != null) {
-            copy.environmentContent = new HashSet<EnvironmentContentDTO>();
-            for (EnvironmentContentDTO eContentDTO : environmentContentDTOSet) {
-                copy.environmentContent.add(eContentDTO.clone());
-            }
-        }
         return copy;
     }
 

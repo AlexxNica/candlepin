@@ -69,19 +69,20 @@ public class EnvironmentTranslator extends
         if (translator != null) {
             dest.setOwner(translator.translate(source.getOwner(), OwnerDTO.class));
 
-            dest.setEnvironmentContent(new HashSet<EnvironmentContentDTO>());
             Set<EnvironmentContent> envContents = source.getEnvironmentContent();
             if (envContents != null) {
                 ObjectTranslator<EnvironmentContent, EnvironmentContentDTO> envContentTranslator =
                     translator.findTranslatorByClass(EnvironmentContent.class, EnvironmentContentDTO.class);
+                Set<EnvironmentContentDTO> environmentContents = new HashSet<EnvironmentContentDTO>();
                 for (EnvironmentContent envContent : envContents) {
                     if (envContent != null) {
                         EnvironmentContentDTO dto = envContentTranslator.translate(translator, envContent);
                         if (dto != null) {
-                            dest.getEnvironmentContent().add(dto);
+                            environmentContents.add(dto);
                         }
                     }
                 }
+                dest.setEnvironmentContent(environmentContents);
             }
         }
         else {

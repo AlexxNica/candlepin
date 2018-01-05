@@ -199,7 +199,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
     public void testCreateConsumer() {
         ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null,
             standardSystemTypeDTO);
-        toSubmit.getFacts().put(METADATA_NAME, METADATA_VALUE);
+        toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
         ConsumerDTO submitted = consumerResource.create(
             toSubmit,
             new UserPrincipal(someuser.getUsername(), Arrays.asList(new Permission [] {
@@ -234,7 +234,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
         ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         assertNull(toSubmit.getId());
         toSubmit.setUuid(uuid);
-        toSubmit.getFacts().put(METADATA_NAME, METADATA_VALUE);
+        toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
 
         ConsumerDTO submitted = consumerResource.create(toSubmit, principal, null, owner.getKey(), null,
             true);
@@ -250,7 +250,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
         // The second post should fail because of constraint failures
         ConsumerDTO anotherToSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         anotherToSubmit.setUuid(uuid);
-        anotherToSubmit.getFacts().put(METADATA_NAME, METADATA_VALUE);
+        anotherToSubmit.setFact(METADATA_NAME, METADATA_VALUE);
         anotherToSubmit.setId(null);
         consumerResource.create(anotherToSubmit, principal, null, owner.getKey(), null, true);
     }
@@ -315,7 +315,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
     public void testRegisterWithConsumerId() {
         ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         toSubmit.setUuid("1023131");
-        toSubmit.getFacts().put(METADATA_NAME, METADATA_VALUE);
+        toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
 
         ConsumerDTO submitted = consumerResource.create(
             toSubmit, TestUtil.createPrincipal(someuser.getUsername(), owner, Access.ALL),

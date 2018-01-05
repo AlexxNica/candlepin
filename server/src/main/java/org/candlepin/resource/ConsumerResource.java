@@ -1647,12 +1647,12 @@ public class ConsumerResource {
 
         Set<Long> serialSet = this.extractSerials(serials);
 
-        List<Certificate> returnCerts = new LinkedList<Certificate>();
+        List<CertificateDTO> returnCerts = new LinkedList<CertificateDTO>();
         List<EntitlementCertificate> allCerts = entCertService.listForConsumer(consumer);
 
         for (EntitlementCertificate cert : allCerts) {
             if (serialSet.isEmpty() || serialSet.contains(cert.getSerial().getId())) {
-                returnCerts.add(cert);
+                returnCerts.add(translator.translate(cert, CertificateDTO.class));
             }
         }
 
@@ -1660,7 +1660,7 @@ public class ConsumerResource {
         try {
             Certificate cert = contentAccessCertService.getCertificate(consumer);
             if (cert != null) {
-                returnCerts.add(cert);
+                returnCerts.add(translator.translate(cert, CertificateDTO.class));
             }
         }
         catch (IOException ioe) {
@@ -1670,8 +1670,7 @@ public class ConsumerResource {
             throw new BadRequestException(i18n.tr("Cannot retrieve content access certificate"), gse);
         }
 
-        return (List<CertificateDTO>) translator.translate(returnCerts, CertificateDTO.class,
-            new ArrayList<CertificateDTO>());
+        return returnCerts;
     }
 
     @ApiOperation(notes = "Retrieves the body of the Content Access Certificate for the Consumer",
@@ -2530,9 +2529,20 @@ public class ConsumerResource {
         @PathParam("consumer_uuid") @Verify(Consumer.class) String consumerUuid) {
         Consumer consumer = consumerCurator.verifyAndLookupConsumer(consumerUuid);
         List<Consumer> consumers = consumerCurator.getGuests(consumer);
-        return (List<ConsumerDTO>) translator.translate(consumers,
-            ConsumerDTO.class,
-            new ArrayList<ConsumerDTO>());
+        return translate(consumers);
+    }
+
+    private List<ConsumerDTO> translate(List<Consumer> consumers) {
+        if (consumers != null) {
+            List<ConsumerDTO> results = new LinkedList<ConsumerDTO>();
+            for (Consumer consumer : consumers) {
+                results.add(translator.translate(consumer, ConsumerDTO.class));
+            }
+            return results;
+        }
+        else {
+            return null;
+        }
     }
 
     @ApiOperation(notes = "Retrieves a Host Consumer of a Consumer", value = "getHost")

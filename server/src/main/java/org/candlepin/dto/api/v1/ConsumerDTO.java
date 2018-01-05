@@ -18,6 +18,9 @@ import org.candlepin.common.jackson.HateoasArrayExclude;
 import org.candlepin.common.jackson.HateoasInclude;
 import org.candlepin.jackson.SingleValueWrapDeserializer;
 import org.candlepin.jackson.SingleValueWrapSerializer;
+import org.candlepin.util.ListView;
+import org.candlepin.util.MapView;
+import org.candlepin.util.SetView;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,6 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import io.swagger.annotations.ApiModel;
 
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -360,7 +365,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      */
     @HateoasArrayExclude
     public Map<String, String> getFacts() {
-        return facts;
+        return this.facts != null ? new MapView<String, String>(facts) : null;
     }
 
     /**
@@ -371,7 +376,19 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public ConsumerDTO setFacts(Map<String, String> facts) {
-        this.facts = facts;
+        if (facts != null) {
+            if (this.facts == null) {
+                this.facts = new HashMap<String, String>();
+            }
+            else {
+                this.facts.clear();
+            }
+
+            this.facts.putAll(facts);
+        }
+        else {
+            this.facts = null;
+        }
         return this;
     }
 
@@ -384,9 +401,14 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public ConsumerDTO setFact(String key, String value) {
+        if (key == null) {
+            throw new IllegalArgumentException("key is null");
+        }
+
         if (facts == null) {
             facts = new HashMap<String, String>();
         }
+
         this.facts.put(key, value);
         return this;
     }
@@ -418,7 +440,8 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public Set<ConsumerInstalledProductDTO> getInstalledProducts() {
-        return this.installedProducts;
+        return this.installedProducts != null ?
+            new SetView<ConsumerInstalledProductDTO>(this.installedProducts) : null;
     }
 
     /**
@@ -429,7 +452,25 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public ConsumerDTO setInstalledProducts(Set<ConsumerInstalledProductDTO> installedProducts) {
-        this.installedProducts = installedProducts;
+        if (installedProducts != null) {
+            if (this.installedProducts == null) {
+                this.installedProducts = new HashSet<ConsumerInstalledProductDTO>();
+            }
+            else {
+                this.installedProducts.clear();
+            }
+
+            for (ConsumerInstalledProductDTO dto : installedProducts) {
+                if (dto == null || StringUtils.isEmpty(dto.getProductId())) {
+                    throw new IllegalArgumentException("collection contains null" +
+                        "or incomplete consumer installed product");
+                }
+                this.installedProducts.add(new ConsumerInstalledProductDTO(dto));
+            }
+        }
+        else {
+            this.installedProducts = null;
+        }
         return this;
     }
 
@@ -441,6 +482,9 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public boolean addInstalledProduct(ConsumerInstalledProductDTO installedProduct) {
+        if (installedProduct == null || StringUtils.isEmpty(installedProduct.getProductId())) {
+            throw new IllegalArgumentException("null or incomplete consumer installed product");
+        }
         if (installedProducts == null) {
             installedProducts = new HashSet<ConsumerInstalledProductDTO>();
         }
@@ -456,8 +500,8 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public boolean removeInstalledProduct(String productId) {
-        if (productId == null) {
-            throw new IllegalArgumentException("productId is null");
+        if (StringUtils.isEmpty(productId)) {
+            throw new IllegalArgumentException("productId is null or empty");
         }
 
         if (this.installedProducts != null) {
@@ -497,7 +541,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public Set<CapabilityDTO> getCapabilities() {
-        return this.capabilities;
+        return this.capabilities != null ? new SetView<CapabilityDTO>(capabilities) : null;
     }
 
     /**
@@ -508,7 +552,25 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public ConsumerDTO setCapabilities(Set<CapabilityDTO> capabilities) {
-        this.capabilities = capabilities;
+        if (capabilities != null) {
+            if (this.capabilities == null) {
+                this.capabilities = new HashSet<CapabilityDTO>();
+            }
+            else {
+                this.capabilities.clear();
+            }
+
+            for (CapabilityDTO dto : capabilities) {
+                if (dto == null || StringUtils.isEmpty(dto.getName())) {
+                    throw new IllegalArgumentException("null or imcomplete consumer capability");
+                }
+
+                this.capabilities.add(new CapabilityDTO(dto));
+            }
+        }
+        else {
+            this.capabilities = null;
+        }
         return this;
     }
 
@@ -539,7 +601,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public Set<String> getContentTags() {
-        return this.contentTags;
+        return this.contentTags != null ? new SetView<String>(this.contentTags) : null;
     }
 
     /**
@@ -550,7 +612,18 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public ConsumerDTO setContentTags(Set<String> contentTags) {
-        this.contentTags = contentTags;
+        if (contentTags != null) {
+            if (this.contentTags == null) {
+                this.contentTags = new HashSet<String>();
+            }
+            else {
+                this.contentTags.clear();
+            }
+            this.contentTags.addAll(contentTags);
+        }
+        else {
+            this.contentTags = null;
+        }
         return this;
     }
 
@@ -682,23 +755,13 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     }
 
     /**
-     * This will put in the property so that the virtWho instances won't error
-     *
-     * @return List always empty
-     */
-    @JsonProperty("guestIds")
-    public List<String> getEmptyGuestIdArray() {
-        return new ArrayList<String>();
-    }
-
-    /**
      * Retrieves the guest id field of this ConsumerDTO object.
      *
      * @return a reference to this DTO object.
      */
-    @JsonIgnore
     public List<GuestIdDTO> getGuestIds() {
-        return this.guestIds;
+        return this.guestIds != null ?
+            new ListView<GuestIdDTO>(this.guestIds) : null;
     }
 
     /**
@@ -710,7 +773,24 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      */
     @JsonProperty
     public ConsumerDTO setGuestIds(List<GuestIdDTO> guestIds) {
-        this.guestIds = guestIds;
+        if (guestIds != null) {
+            if (this.guestIds == null) {
+                this.guestIds = new LinkedList<GuestIdDTO>();
+            }
+            else {
+                this.guestIds.clear();
+            }
+
+            for (GuestIdDTO dto : guestIds) {
+                if (dto == null || dto.getGuestId() == null) {
+                    throw new IllegalArgumentException("guest is null or incomplete");
+                }
+                this.guestIds.add(new GuestIdDTO(dto));
+            }
+        }
+        else {
+            this.guestIds = null;
+        }
         return this;
     }
 
@@ -722,7 +802,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public boolean addGuestId(GuestIdDTO guestId) {
-        if (guestId == null) {
+        if (guestId == null || StringUtils.isEmpty(guestId.getGuestId())) {
             throw new IllegalArgumentException("guestId is null");
         }
         if (guestIds == null) {
@@ -748,7 +828,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
      * @return a reference to this DTO object.
      */
     public boolean removeGuestId(String guestId) {
-        if (guestId == null) {
+        if (StringUtils.isEmpty(guestId)) {
             throw new IllegalArgumentException("guestId is null");
         }
 
@@ -791,13 +871,6 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     @HateoasInclude
     public String getHref() {
         return this.uuid != null ? String.format("/consumers/%s", this.uuid) : null;
-    }
-
-    public void setHref(String href) {
-        /*
-         * No-op, here to aid with updating objects which have nested objects that were
-         * originally sent down to the client in HATEOAS form.
-         */
     }
 
     /**
@@ -907,42 +980,15 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     public ConsumerDTO clone() {
         ConsumerDTO copy = super.clone();
 
-        OwnerDTO owner = this.getOwner();
-        copy.owner = owner != null ? (OwnerDTO) owner.clone() : null;
-
-        EnvironmentDTO environment = this.getEnvironment();
-        copy.environment = environment != null ? (EnvironmentDTO) environment.clone() : null;
-
-        Map<String, String> facts = this.getFacts();
-        copy.facts = facts != null ? new HashMap<String, String>(facts) : null;
-
-        Set<ConsumerInstalledProductDTO> installedProducts = this.getInstalledProducts();
-        if (installedProducts != null) {
-            copy.installedProducts = new HashSet<ConsumerInstalledProductDTO>();
-            for (ConsumerInstalledProductDTO installedProduct: installedProducts) {
-                copy.installedProducts.add(installedProduct.clone());
-            }
-        }
-
-        Set<CapabilityDTO> capabilities = this.getCapabilities();
-        if (capabilities != null) {
-            copy.capabilities = new HashSet<CapabilityDTO>();
-            for (CapabilityDTO capabilityDTO: capabilities) {
-                copy.capabilities.add(capabilityDTO.clone());
-            }
-        }
-
-        HypervisorIdDTO hypervisorId = this.getHypervisorId();
-        copy.hypervisorId = hypervisorId != null ? (HypervisorIdDTO) hypervisorId.clone() : null;
-
-        Set<String> contentTags = this.getContentTags();
-        copy.contentTags = contentTags != null ? new HashSet<String>(contentTags) : null;
-
-        ConsumerTypeDTO type = this.getType();
-        copy.type = type != null ? (ConsumerTypeDTO) type.clone() : null;
-
-        CertificateDTO cert = this.getIdCert();
-        copy.idCert = cert != null ? (CertificateDTO) cert.clone() : null;
+        copy.owner = owner != null ? owner.clone() : null;
+        copy.environment = environment != null ? environment.clone() : null;
+        copy.setFacts(this.getFacts());
+        copy.setInstalledProducts(this.getInstalledProducts());
+        copy.setCapabilities(this.getCapabilities());
+        copy.hypervisorId = hypervisorId != null ? hypervisorId.clone() : null;
+        copy.setContentTags(this.getContentTags());
+        copy.type = type != null ? type.clone() : null;
+        copy.idCert = idCert != null ? idCert.clone() : null;
 
         return copy;
     }

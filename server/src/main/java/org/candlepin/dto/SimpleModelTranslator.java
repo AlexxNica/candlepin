@@ -17,14 +17,12 @@ package org.candlepin.dto;
 import org.candlepin.model.CandlepinQuery;
 import org.candlepin.util.ElementTransformer;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -310,29 +308,6 @@ public class SimpleModelTranslator implements ModelTranslator {
         }
 
         return output;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public <I, O> Collection<O> translate(Collection<I> inputCollection, Class<O> outputClass,
-        Collection<O> outputCollection) {
-
-        if (outputClass == null) {
-            throw new IllegalArgumentException("outputClass is null");
-        }
-        if (outputCollection == null) {
-            throw new IllegalArgumentException("outputCollection is null");
-        }
-
-        if (CollectionUtils.isNotEmpty(inputCollection)) {
-            for (I i : inputCollection) {
-                O o = translate(i, outputClass);
-                outputCollection.add(o);
-            }
-        }
-
-        return outputCollection;
     }
 
     /**

@@ -19,12 +19,10 @@ import org.candlepin.dto.ObjectTranslator;
 import org.candlepin.model.Consumer;
 import org.candlepin.model.ConsumerCapability;
 import org.candlepin.model.ConsumerInstalledProduct;
-import org.candlepin.model.GuestId;
 import org.candlepin.model.Release;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -96,24 +94,24 @@ public class ConsumerTranslator extends
 
             Set<ConsumerInstalledProduct> installedProducts = source.getInstalledProducts();
             if (installedProducts != null) {
-                dest.setInstalledProducts(new HashSet<ConsumerInstalledProductDTO>());
                 ObjectTranslator<ConsumerInstalledProduct, ConsumerInstalledProductDTO> cipTranslator =
                     translator.findTranslatorByClass(ConsumerInstalledProduct.class,
                     ConsumerInstalledProductDTO.class);
-
+                Set<ConsumerInstalledProductDTO> ips = new HashSet<ConsumerInstalledProductDTO>();
                 for (ConsumerInstalledProduct cip : installedProducts) {
                     if (cip != null) {
                         ConsumerInstalledProductDTO dto = cipTranslator.translate(translator, cip);
                         if (dto != null) {
-                            dest.getInstalledProducts().add(dto);
+                            ips.add(dto);
                         }
                     }
                 }
+                dest.setInstalledProducts(ips);
             }
 
             Set<ConsumerCapability> capabilities = source.getCapabilities();
             if (capabilities != null) {
-                dest.setCapabilities(new HashSet<CapabilityDTO>());
+                Set<CapabilityDTO> capabilitiesDTO = new HashSet<CapabilityDTO>();
                 ObjectTranslator<ConsumerCapability, CapabilityDTO> capabilityTranslator =
                     translator.findTranslatorByClass(ConsumerCapability.class, CapabilityDTO.class);
 
@@ -121,27 +119,15 @@ public class ConsumerTranslator extends
                     if (capability != null) {
                         CapabilityDTO dto = capabilityTranslator.translate(translator, capability);
                         if (dto != null) {
-                            dest.getCapabilities().add(dto);
+                            capabilitiesDTO.add(dto);
                         }
                     }
                 }
+                dest.setCapabilities(capabilitiesDTO);
             }
 
-            List<GuestId> guestIds = source.getGuestIds();
-            if (guestIds != null) {
-                dest.setGuestIds(new ArrayList<GuestIdDTO>());
-                ObjectTranslator<GuestId, GuestIdDTO> guestIdTranslator =
-                    translator.findTranslatorByClass(GuestId.class, GuestIdDTO.class);
-
-                for (GuestId guestId : guestIds) {
-                    if (guestId != null) {
-                        GuestIdDTO dto = guestIdTranslator.translate(translator, guestId);
-                        if (dto != null) {
-                            dest.getGuestIds().add(dto);
-                        }
-                    }
-                }
-            }
+            //This will put in the property so that the virtWho instances won't error
+            dest.setGuestIds(new ArrayList<GuestIdDTO>());
 
             dest.setHypervisorId(translator.translate(source.getHypervisorId(), HypervisorIdDTO.class));
             dest.setType(translator.translate(source.getType(), ConsumerTypeDTO.class));

@@ -84,6 +84,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -917,6 +919,12 @@ public class ConsumerResourceUpdateTest {
     }
 
     private ConsumerDTO createConsumerDTOWithGuests(String ... guestIds) {
-        return translator.translate(createConsumerWithGuests(guestIds), ConsumerDTO.class);
+        Consumer consumer = createConsumerWithGuests(guestIds);
+        // re-add guestIds as consumer translator removes them.
+        List<GuestIdDTO> guestIdDTOS = new LinkedList<GuestIdDTO>();
+        for (GuestId guestId : consumer.getGuestIds()) {
+            guestIdDTOS.add(translator.translate(guestId, GuestIdDTO.class));
+        }
+        return translator.translate(consumer, ConsumerDTO.class).setGuestIds(guestIdDTOS);
     }
 }

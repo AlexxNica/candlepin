@@ -16,6 +16,7 @@ package org.candlepin.dto.api.v1;
 
 import org.candlepin.common.jackson.HateoasArrayExclude;
 import org.candlepin.common.jackson.HateoasInclude;
+import org.candlepin.util.MapView;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 
@@ -119,7 +120,8 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
      */
     @HateoasArrayExclude
     public Map<String, String> getAttributes() {
-        return attributes;
+        return this.attributes != null ?
+            new MapView<String, String>(attributes) : null;
     }
 
     /**
@@ -130,7 +132,18 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
      * @return a reference to this DTO object.
      */
     public GuestIdDTO setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
+        if (attributes != null) {
+            if (this.attributes == null) {
+                this.attributes = new HashMap<String, String>();
+            }
+            else {
+                this.attributes.clear();
+            }
+            this.attributes.putAll(attributes);
+        }
+        else {
+            this.attributes = null;
+        }
         return this;
     }
 
@@ -139,9 +152,7 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
      */
     @Override
     public String toString() {
-        return String.format(
-            "GuestIdDTO [id: %s, guestId: %s]",
-            this.getId(), this.getGuestId());
+        return String.format("GuestIdDTO [id: %s, guestId: %s]", this.getId(), this.getGuestId());
     }
 
     /**
@@ -186,10 +197,7 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
     @Override
     public GuestIdDTO clone() {
         GuestIdDTO copy = super.clone();
-        Map<String, String> attributes = this.getAttributes();
-        if (attributes != null) {
-            copy.setAttributes(new HashMap<String, String>(attributes));
-        }
+        copy.setAttributes(this.getAttributes());
         return copy;
     }
 
