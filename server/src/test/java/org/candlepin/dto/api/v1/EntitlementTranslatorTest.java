@@ -104,7 +104,7 @@ public class EntitlementTranslatorTest extends
 
             if (childrenGenerated) {
                 this.ownerTranslatorTest
-                        .verifyOutput(source.getOwner(), dest.getOwner(), true);
+                    .verifyOutput(source.getOwner(), dest.getOwner(), true);
 
                 this.poolTranslatorTest.verifyOutput(source.getPool(), dest.getPool(), true);
 

@@ -270,9 +270,7 @@ public class PoolDTOTest extends AbstractDTOTest<PoolDTO> {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
-            new PoolDTO.ProvidedProductDTO(
-            "test-id-provided-product-1",
-            "test-name-provided-product-1");
+            new PoolDTO.ProvidedProductDTO("test-id-provided-product-1", "test-name-provided-product-1");
         assertTrue(dto.addProvidedProduct(product));
     }
 
@@ -281,15 +279,11 @@ public class PoolDTOTest extends AbstractDTOTest<PoolDTO> {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
-            new PoolDTO.ProvidedProductDTO(
-            "test-id-provided-product-2",
-            "test-name-provided-product-2");
+            new PoolDTO.ProvidedProductDTO("test-id-provided-product-2", "test-name-provided-product-2");
         assertTrue(dto.addProvidedProduct(product));
 
         PoolDTO.ProvidedProductDTO product2 =
-            new PoolDTO.ProvidedProductDTO(
-            "test-id-provided-product-2",
-            "test-name-provided-product-2");
+            new PoolDTO.ProvidedProductDTO("test-id-provided-product-2", "test-name-provided-product-2");
         assertFalse(dto.addProvidedProduct(product2));
     }
 
@@ -299,43 +293,42 @@ public class PoolDTOTest extends AbstractDTOTest<PoolDTO> {
         dto.addProvidedProduct(null);
     }
 
-
     @Test(expected = IllegalArgumentException.class)
     public void testAddProvidedProductWithEmptyId() {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
-            new PoolDTO.ProvidedProductDTO(
-            "",
-            "test-name-provided-product-3");
+            new PoolDTO.ProvidedProductDTO("", "test-name-provided-product-3");
         dto.addProvidedProduct(product);
     }
 
     @Test
+    @SuppressWarnings("checkstyle:indentation")
     public void testAddDerivedProvidedProductWithAbsentDerivedProvidedProduct() {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
             new PoolDTO.ProvidedProductDTO(
-            "test-id-derived-provided-product-1",
-            "test-name-derived-provided-product-1");
+                "test-id-derived-provided-product-1",
+                "test-name-derived-provided-product-1");
         assertTrue(dto.addDerivedProvidedProduct(product));
     }
 
     @Test
+    @SuppressWarnings("checkstyle:indentation")
     public void testAddDerivedProvidedProductWithPresentDerivedProvidedProduct() {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
             new PoolDTO.ProvidedProductDTO(
-            "test-id-derived-provided-product-2",
-            "test-name-derived-provided-product-2");
+                "test-id-derived-provided-product-2",
+                "test-name-derived-provided-product-2");
         assertTrue(dto.addDerivedProvidedProduct(product));
 
         PoolDTO.ProvidedProductDTO product2 =
             new PoolDTO.ProvidedProductDTO(
-            "test-id-derived-provided-product-2",
-            "test-name-derived-provided-product-2");
+                "test-id-derived-provided-product-2",
+                "test-name-derived-provided-product-2");
         assertFalse(dto.addDerivedProvidedProduct(product2));
     }
 
@@ -350,9 +343,7 @@ public class PoolDTOTest extends AbstractDTOTest<PoolDTO> {
         PoolDTO dto = new PoolDTO();
 
         PoolDTO.ProvidedProductDTO product =
-            new PoolDTO.ProvidedProductDTO(
-            "",
-            "test-name-derived-provided-product-3");
+            new PoolDTO.ProvidedProductDTO("", "test-name-derived-provided-product-3");
         dto.addDerivedProvidedProduct(product);
     }
 

@@ -61,6 +61,7 @@ public class PoolTranslator extends TimestampedEntityTranslator<Pool, PoolDTO> {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("checkstyle:methodlength")
     public PoolDTO populate(ModelTranslator modelTranslator, Pool source, PoolDTO dest) {
         dest = super.populate(modelTranslator, source, dest);
 
@@ -100,101 +101,88 @@ public class PoolTranslator extends TimestampedEntityTranslator<Pool, PoolDTO> {
 
         // Process nested objects if we have a model translator to use to the translation...
         if (modelTranslator != null) {
-            processNestedObjects(modelTranslator, source, dest);
+            Owner owner = source.getOwner();
+            dest.setOwner(owner != null ? modelTranslator.translate(owner, OwnerDTO.class) : null);
+
+            Product product = source.getProduct();
+            dest.setProduct(product != null ? modelTranslator.translate(product, ProductDTO.class) : null);
+
+            Product derivedProduct = source.getDerivedProduct();
+            dest.setDerivedProduct(derivedProduct != null ?
+                modelTranslator.translate(derivedProduct, ProductDTO.class) : null);
+
+            SubscriptionsCertificate subCertificate = source.getCertificate();
+            dest.setCertificate(subCertificate != null ?
+                modelTranslator.translate(subCertificate, CertificateDTO.class) : null);
+
+            Entitlement sourceEntitlement = source.getSourceEntitlement();
+            dest.setSourceEntitlement(sourceEntitlement != null ?
+                modelTranslator.translate(sourceEntitlement, EntitlementDTO.class) : null);
+
+            SourceSubscription sourceSubscription = source.getSourceSubscription();
+            if (sourceSubscription != null) {
+                dest.setSourceSubscription(
+                    new PoolDTO.SourceSubscriptionDTO(
+                    sourceSubscription.getId(),
+                    sourceSubscription.getSubscriptionId(),
+                    sourceSubscription.getSubscriptionSubKey()));
+            }
+            else {
+                dest.setSourceSubscription(null);
+            }
+
+            SourceStack sourceStack = source.getSourceStack();
+            if (sourceStack != null) {
+                dest.setSourceStack(
+                    new PoolDTO.SourceStackDTO(
+                    sourceStack.getId(),
+                    sourceStack.getSourceStackId(),
+                    sourceStack.getSourceConsumer()));
+            }
+            else {
+                dest.setSourceStack(null);
+            }
+
+            Set<Branding> branding = source.getBranding();
+            if (branding != null && !branding.isEmpty()) {
+                for (Branding brand : branding) {
+                    if (brand != null) {
+                        dest.addBranding(
+                            new BrandingDTO(brand.getProductId(), brand.getName(), brand.getType()));
+                    }
+                }
+            }
+            else {
+                dest.setBranding(Collections.<BrandingDTO>emptySet());
+            }
+
+            Set<Product> products = source.getProvidedProducts();
+            if (products != null && !products.isEmpty()) {
+                for (Product prod : products) {
+                    if (prod != null) {
+                        dest.addProvidedProduct(
+                            new PoolDTO.ProvidedProductDTO(prod.getId(), prod.getName()));
+                    }
+                }
+            }
+            else {
+                dest.setProvidedProducts(Collections.<PoolDTO.ProvidedProductDTO>emptySet());
+            }
+
+            Set<Product> derivedProducts = source.getDerivedProvidedProducts();
+            if (derivedProducts != null && !derivedProducts.isEmpty()) {
+                for (Product derivedProd : derivedProducts) {
+                    if (derivedProd != null) {
+                        dest.addDerivedProvidedProduct(
+                            new PoolDTO.ProvidedProductDTO(derivedProd.getId(), derivedProd.getName()));
+                    }
+                }
+            }
+            else {
+                dest.setDerivedProvidedProducts(Collections.<PoolDTO.ProvidedProductDTO>emptySet());
+            }
         }
 
         return dest;
-    }
-
-    /**
-     * Utility method that translates the Pool's nested objects.
-     *
-     * @param modelTranslator the translator used to translate the nested objects.
-     *
-     * @param source the pool model object we are translating.
-     *
-     * @param dest the pool DTO object that the source model object is being translated to.
-     */
-    private void processNestedObjects(ModelTranslator modelTranslator, Pool source, PoolDTO dest) {
-        Owner owner = source.getOwner();
-        dest.setOwner(owner != null ? modelTranslator.translate(owner, OwnerDTO.class) : null);
-
-        Product product = source.getProduct();
-        dest.setProduct(product != null ? modelTranslator.translate(product, ProductDTO.class) : null);
-
-        Product derivedProduct = source.getDerivedProduct();
-        dest.setDerivedProduct(derivedProduct != null ?
-            modelTranslator.translate(derivedProduct, ProductDTO.class) : null);
-
-        SubscriptionsCertificate subCertificate = source.getCertificate();
-        dest.setCertificate(subCertificate != null ?
-            modelTranslator.translate(subCertificate, CertificateDTO.class) : null);
-
-        Entitlement sourceEntitlement = source.getSourceEntitlement();
-        dest.setSourceEntitlement(sourceEntitlement != null ?
-            modelTranslator.translate(sourceEntitlement, EntitlementDTO.class) : null);
-
-        SourceSubscription sourceSubscription = source.getSourceSubscription();
-        if (sourceSubscription != null) {
-            dest.setSourceSubscription(
-                new PoolDTO.SourceSubscriptionDTO(
-                sourceSubscription.getId(),
-                sourceSubscription.getSubscriptionId(),
-                sourceSubscription.getSubscriptionSubKey()));
-        }
-        else {
-            dest.setSourceSubscription(null);
-        }
-
-        SourceStack sourceStack = source.getSourceStack();
-        if (sourceStack != null) {
-            dest.setSourceStack(
-                new PoolDTO.SourceStackDTO(
-                sourceStack.getId(),
-                sourceStack.getSourceStackId(),
-                sourceStack.getSourceConsumer()));
-        }
-        else {
-            dest.setSourceStack(null);
-        }
-
-        Set<Branding> branding = source.getBranding();
-        if (branding != null && !branding.isEmpty()) {
-            for (Branding brand : branding) {
-                if (brand != null) {
-                    dest.addBranding(
-                        new BrandingDTO(brand.getProductId(), brand.getName(), brand.getType()));
-                }
-            }
-        }
-        else {
-            dest.setBranding(Collections.<BrandingDTO>emptySet());
-        }
-
-        Set<Product> products = source.getProvidedProducts();
-        if (products != null && !products.isEmpty()) {
-            for (Product prod : products) {
-                if (prod != null) {
-                    dest.addProvidedProduct(
-                        new PoolDTO.ProvidedProductDTO(prod.getId(), prod.getName()));
-                }
-            }
-        }
-        else {
-            dest.setProvidedProducts(Collections.<PoolDTO.ProvidedProductDTO>emptySet());
-        }
-
-        Set<Product> derivedProducts = source.getDerivedProvidedProducts();
-        if (derivedProducts != null && !derivedProducts.isEmpty()) {
-            for (Product derivedProd : derivedProducts) {
-                if (derivedProd != null) {
-                    dest.addDerivedProvidedProduct(
-                        new PoolDTO.ProvidedProductDTO(derivedProd.getId(), derivedProd.getName()));
-                }
-            }
-        }
-        else {
-            dest.setDerivedProvidedProducts(Collections.<PoolDTO.ProvidedProductDTO>emptySet());
-        }
     }
 }

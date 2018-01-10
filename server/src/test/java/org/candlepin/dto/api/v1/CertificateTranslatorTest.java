@@ -55,7 +55,6 @@ public class CertificateTranslatorTest extends
 
     @Override
     protected Certificate initSourceObject() {
-        //FIXME: This should not be returning an IdentityCertificate, since this class is generic.
         IdentityCertificate cert = new IdentityCertificate();
 
         cert.setId("123");

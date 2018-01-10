@@ -610,6 +610,7 @@ public class OwnerResource {
      * @throws IllegalArgumentException
      *  if either entity or dto are null
      */
+    @SuppressWarnings("checkstyle:methodlength")
     protected void populateEntity(Pool entity, PoolDTO dto) {
         if (entity == null) {
             throw new IllegalArgumentException("entity is null");
@@ -707,22 +708,6 @@ public class OwnerResource {
             entity.setUpstreamConsumerId(dto.getUpstreamConsumerId());
         }
 
-        populateNestedCollections(entity, dto);
-
-        populateNestedEntities(entity, dto);
-    }
-
-    /**
-     * Populates the specified entity's nested collections with data
-     * from the provided DTO's nested collections.
-     *
-     * @param entity
-     *  The entity instance to populate.
-     *
-     * @param dto
-     *  The DTO containing the data with which to populate the entity.
-     */
-    private void populateNestedCollections(Pool entity, PoolDTO dto) {
         if (dto.getAttributes() != null) {
             if (dto.getAttributes().isEmpty()) {
                 entity.setAttributes(Collections.<String, String>emptyMap());
@@ -819,24 +804,6 @@ public class OwnerResource {
                 entity.setDerivedProvidedProductDtos(derivedProducts);
             }
         }
-    }
-
-    /**
-     * Populates the specified entity's nested objects with data from the provided DTO's nested objects.
-     *
-     * @param entity
-     *  The entity instance to populate.
-     *
-     * @param dto
-     *  The DTO containing the data with which to populate the entity.
-     *
-     * @throws NotFoundException
-     *  if any nested object was not found in the system.
-     *
-     * @throws BadRequestException
-     *  if any nested object had incomplete/invalid data.
-     */
-    private void populateNestedEntities(Pool entity, PoolDTO dto) {
 
         // The owner might already be populated in the endpoint method.
         if (entity.getOwner() == null) {
@@ -1919,12 +1886,11 @@ public class OwnerResource {
         }
 
         // Verify the pool type is one that allows modifications
-        if (currentPool.getType() != PoolType.NORMAL ||
-            !newPoolDTO.getType().equals(PoolType.NORMAL.toString())) {
+        if (currentPool.getType() != PoolType.NORMAL) {
             throw new BadRequestException(i18n.tr("Cannot update bonus pools, as they are auto generated"));
         }
 
-        if (currentPool.isCreatedByShare() || newPoolDTO.isCreatedByShare()) {
+        if (currentPool.isCreatedByShare()) {
             throw new BadRequestException(i18n.tr("Cannot update shared pools, This should be triggered " +
                 "by updating the share entitlement instead"));
         }

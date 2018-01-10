@@ -519,7 +519,7 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
         copy.certificates = this.getCertificates();
 
         copy.endDateOverride = this.getEndDateOverride() != null ?
-                new Date(this.getEndDateOverride().getTime()) : null;
+            new Date(this.getEndDateOverride().getTime()) : null;
 
         return copy;
     }
@@ -532,15 +532,15 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
         super.populate(source);
 
         this.setId(source.getId())
-                .setOwner(source.getOwner())
-                .setPool(source.getPool())
-                .setConsumer(source.getConsumer())
-                .setQuantity(source.getQuantity())
-                .setDirty(source.isDirty())
-                .setEndDateOverride(source.getEndDateOverride())
-                .setUpdatedOnStart(source.isUpdatedOnStart())
-                .setDeletedFromPool(source.isDeletedFromPool())
-                .setCertificates(source.getCertificates());
+            .setOwner(source.getOwner())
+            .setPool(source.getPool())
+            .setConsumer(source.getConsumer())
+            .setQuantity(source.getQuantity())
+            .setDirty(source.isDirty())
+            .setEndDateOverride(source.getEndDateOverride())
+            .setUpdatedOnStart(source.isUpdatedOnStart())
+            .setDeletedFromPool(source.isDeletedFromPool())
+            .setCertificates(source.getCertificates());
 
         return this;
     }
