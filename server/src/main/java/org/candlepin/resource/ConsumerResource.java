@@ -383,7 +383,7 @@ public class ConsumerResource {
         return this.consumerCurator.searchOwnerConsumers(
             owner, userName, types, uuids, hypervisorIds, attrFilters,
             Collections.<String>emptyList(), Collections.<String>emptyList(),
-            Collections.<String>emptyList());
+            Collections.<String>emptyList(), null);
     }
 
     @ApiOperation(
@@ -483,8 +483,14 @@ public class ConsumerResource {
             // Share consumers do not need identity certificates so refuse to create them.
             identityCertCreation = false;
             validateShareConsumer(consumer, principal, keys);
+            // if there exists a share consumer between the two orgs, return it.
+            Consumer existingConsumer = consumerCurator.searchOwnerConsumers(owner,
+                null, null, null, null, null, null, null, null,
+                consumer.getRecipientOwnerKey()).uniqueResult();
+            if (existingConsumer != null) {
+                return existingConsumer;
+            }
             consumer.setAutoheal(false);
-
         }
         else {
             consumer.setCanActivate(subAdapter.canActivateSubscription(consumer));

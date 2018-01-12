@@ -713,7 +713,7 @@ public class OwnerResource {
 
         return this.consumerCurator.searchOwnerConsumers(
             owner, userName, types, uuids, hypervisorIds, attrFilters, skus,
-            subscriptionIds, contracts);
+            subscriptionIds, contracts, null);
     }
 
     @GET

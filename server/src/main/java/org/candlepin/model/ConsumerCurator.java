@@ -707,7 +707,7 @@ public class ConsumerCurator extends AbstractHibernateCurator<Consumer> {
     public CandlepinQuery<Consumer> searchOwnerConsumers(Owner owner, String userName,
         Collection<ConsumerType> types, List<String> uuids, List<String> hypervisorIds,
         List<KeyValueParameter> factFilters, List<String> skus,
-        List<String> subscriptionIds, List<String> contracts) {
+        List<String> subscriptionIds, List<String> contracts, String recipientOwnerKey) {
 
         DetachedCriteria crit = super.createSecureDetachedCriteria();
         if (owner != null) {
@@ -715,6 +715,9 @@ public class ConsumerCurator extends AbstractHibernateCurator<Consumer> {
         }
         if (userName != null && !userName.isEmpty()) {
             crit.add(Restrictions.eq("username", userName));
+        }
+        if (recipientOwnerKey != null && !recipientOwnerKey.isEmpty()) {
+            crit.add(Restrictions.eq("recipientOwnerKey", recipientOwnerKey));
         }
         if (types != null && !types.isEmpty()) {
             crit.add(Restrictions.in("type", types));

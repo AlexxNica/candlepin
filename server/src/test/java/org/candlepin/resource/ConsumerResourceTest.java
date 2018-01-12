@@ -741,7 +741,7 @@ public class ConsumerResourceTest {
         when(mockedConsumerCurator.searchOwnerConsumers(
             any(Owner.class), anyString(), (java.util.Collection<ConsumerType>) any(Collection.class),
             any(List.class), any(List.class), any(List.class), any(List.class), any(List.class),
-            any(List.class))).thenReturn(cqmock);
+            any(List.class), anyString())).thenReturn(cqmock);
 
         List<Consumer> result = cr.list("TaylorSwift", null, null, null, null, null, null).list();
         assertEquals(consumers, result);
@@ -762,7 +762,7 @@ public class ConsumerResourceTest {
         when(mockedConsumerCurator.searchOwnerConsumers(
             any(Owner.class), anyString(), (java.util.Collection<ConsumerType>) any(Collection.class),
             any(List.class), any(List.class), any(List.class), any(List.class), any(List.class),
-            any(List.class))).thenReturn(cqmock);
+            any(List.class), anyString())).thenReturn(cqmock);
 
         List<Consumer> result = cr.list(null, null, "taylorOwner", null, null, null, null).list();
         assertEquals(consumers, result);
@@ -794,7 +794,7 @@ public class ConsumerResourceTest {
         when(mockedConsumerCurator.searchOwnerConsumers(
             any(Owner.class), anyString(), (java.util.Collection<ConsumerType>) any(Collection.class),
             any(List.class), any(List.class), any(List.class),
-            any(List.class), any(List.class), any(List.class))).thenReturn(cqmock);
+            any(List.class), any(List.class), any(List.class), anyString())).thenReturn(cqmock);
 
         List<String> uuids = new ArrayList<String>();
         uuids.add("swiftuuid");

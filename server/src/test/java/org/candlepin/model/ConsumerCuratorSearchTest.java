@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,7 +48,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
     @Inject private Configuration config;
 
     private Owner owner;
-    private ConsumerType ct;
+    private ConsumerType ct, st;
 
     @Before
     public void setUp() {
@@ -55,7 +56,8 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         owner = ownerCurator.create(owner);
         ct = new ConsumerType(ConsumerTypeEnum.SYSTEM);
         ct = consumerTypeCurator.create(ct);
-
+        st = new ConsumerType(ConsumerTypeEnum.SHARE);
+        st = consumerTypeCurator.create(st);
         config.setProperty(ConfigProperties.INTEGER_FACTS, "system.count, system.multiplier");
         config.setProperty(ConfigProperties.NON_NEG_INTEGER_FACTS, "system.count");
     }
@@ -79,7 +81,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("notAKey", "notAVal"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(0, results.size());
     }
 
@@ -102,7 +104,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("testkey", "testval"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            null, null, null, null, null, factFilters, null, null, null).list();
+            null, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -128,7 +130,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<String> uuids = new LinkedList<String>();
         uuids.add(consumer.getUuid());
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            null, null, null, uuids, null, factFilters, null, null, null).list();
+            null, null, null, uuids, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -149,7 +151,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         hypervisorIds.add(hypervisorid.toUpperCase());
 
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            null, null, null, null, hypervisorIds, null, null, null, null).list();
+            null, null, null, null, hypervisorIds, null, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -184,9 +186,90 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         uuids.add(consumer.getUuid());
         uuids.add(otherOwnCons.getUuid());
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, uuids, null, factFilters, null, null, null).list();
+            owner, null, null, uuids, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
+    }
+
+    @Test
+    public void testSearchShareConsumer() {
+        Consumer consumer = new Consumer("testConsumer", "testUser", owner, st);
+        consumer.setRecipientOwnerKey("britneySwift");
+        consumer = consumerCurator.create(consumer);
+
+        // Create another consumer to make sure we're not just retrieving everything
+        Consumer otherConsumer = new Consumer("testConsumer2", "testUser2", owner, st);
+        otherConsumer = consumerCurator.create(otherConsumer);
+
+        Owner otherOwner = new Owner("test-owner1", "Test Owner1");
+        otherOwner = ownerCurator.create(otherOwner);
+        Consumer otherOwnCons = new Consumer("testConsumer3", "testUser3", otherOwner, st);
+        otherOwnCons.setRecipientOwnerKey("britneySwift");
+        otherOwnCons = consumerCurator.create(otherOwnCons);
+
+        List<Consumer> results = consumerCurator.searchOwnerConsumers(
+            owner, null, null, null, null, null, null, null, null, "britneySwift").list();
+        assertEquals(1, results.size());
+        assertEquals(consumer, results.get(0));
+    }
+
+    @Test
+    public void testSearchAllRecipientShareConsumers() {
+        Consumer consumer = new Consumer("testConsumer", "testUser", owner, st);
+        consumer.setRecipientOwnerKey("britneySwift");
+        consumer = consumerCurator.create(consumer);
+
+        // Create another consumer to make sure we're not just retrieving everything
+        Consumer otherConsumer = new Consumer("testConsumer2", "testUser2", owner, ct);
+        otherConsumer = consumerCurator.create(otherConsumer);
+
+        Owner otherOwner = new Owner("test-owner1", "Test Owner1");
+        otherOwner = ownerCurator.create(otherOwner);
+        Consumer otherOwnCons = new Consumer("testConsumer3", "testUser3", otherOwner, st);
+        otherOwnCons.setRecipientOwnerKey("britneySwift");
+        otherOwnCons = consumerCurator.create(otherOwnCons);
+
+        List<Consumer> results = consumerCurator.searchOwnerConsumers(
+            null, null, null, null, null, null, null, null, null, "britneySwift").list();
+        assertEquals(2, results.size());
+        assertTrue(results.contains(consumer));
+        assertTrue(results.contains(otherOwnCons));
+    }
+
+    @Test
+    public void testReturnOnlyIfRecipientOwnerMatches() {
+        Consumer consumer = new Consumer("testConsumer", "testUser", owner, st);
+        consumer.setRecipientOwnerKey("britneySwift");
+        consumer = consumerCurator.create(consumer);
+
+        List<Consumer> results = consumerCurator.searchOwnerConsumers(
+            null, null, null, null, null, null, null, null, null, "taylorSpears").list();
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    public void testReturnAllShareConsumers() {
+        Consumer consumer = new Consumer("testConsumer1", "testUser", owner, st);
+        consumer.setRecipientOwnerKey("britneySwift");
+        consumer = consumerCurator.create(consumer);
+        Consumer consumer2 = new Consumer("testConsumer2", "testUser", owner, st);
+        consumer2.setRecipientOwnerKey("Adelle");
+        consumer2 = consumerCurator.create(consumer2);
+        Consumer consumer3 = new Consumer("testConsumer3", "testUser", owner, st);
+        consumer3.setRecipientOwnerKey("Cher");
+        consumer3 = consumerCurator.create(consumer3);
+        Consumer consumer4 = new Consumer("testConsumer4", "testUser", owner, ct);
+        consumer4 = consumerCurator.create(consumer4);
+
+        List<ConsumerType> types = Collections.singletonList(st);
+
+        List<Consumer> results = consumerCurator.searchOwnerConsumers(
+            owner, null, types, null, null, null, null, null, null, null).list();
+        assertEquals(3, results.size());
+        assertTrue(results.contains(consumer));
+        assertTrue(results.contains(consumer2));
+        assertTrue(results.contains(consumer3));
+        assertFalse(results.contains(consumer4));
     }
 
     @Test
@@ -208,7 +291,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("testkey", "testval"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -224,7 +307,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("a", "\"')"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -240,7 +323,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("%", "'); SELECT id from cp_owners"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -256,7 +339,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("%", "'); SELECT * from cp_owners"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -280,7 +363,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("testkey", "teSTVal"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -304,7 +387,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("Testkey", "testval"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(0, results.size());
     }
 
@@ -327,7 +410,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("*key*", "testval"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(2, results.size());
     }
 
@@ -350,7 +433,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("key", "*val*"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(2, results.size());
     }
 
@@ -373,7 +456,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<KeyValueParameter> factFilters = new LinkedList<KeyValueParameter>();
         factFilters.add(new TestingKeyValueParameter("key", "test*test"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(2, results.size());
     }
 
@@ -399,7 +482,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         factFilters.add(new TestingKeyValueParameter("key1", "value1"));
         factFilters.add(new TestingKeyValueParameter("key2", "value2"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -427,7 +510,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         factFilters.add(new TestingKeyValueParameter("key2", "value2"));
         factFilters.add(new TestingKeyValueParameter("key2", "value3"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(2, results.size());
     }
 
@@ -453,7 +536,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         factFilters.add(new TestingKeyValueParameter("key1", "value2"));
         factFilters.add(new TestingKeyValueParameter("key2", "value1"));
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, factFilters, null, null, null).list();
+            owner, null, null, null, null, factFilters, null, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(otherConsumer, results.get(0));
     }
@@ -512,7 +595,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<String> subscriptionIds = new ArrayList<String>();
         subscriptionIds.add(source1);
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, null, subscriptionIds, null).list();
+            owner, null, null, null, null, null, null, subscriptionIds, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -569,7 +652,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<String> contracts = new ArrayList<String>();
         contracts.add("CONTRACT_123");
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, null, null, contracts).list();
+            owner, null, null, null, null, null, null, null, contracts, null).list();
 
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
@@ -633,14 +716,15 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<String> skus = new ArrayList<String>();
         skus.add("SKU1");
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, skus, null, null).list();
+            owner, null, null, null, null, null, skus, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
 
         skus.clear();
         // MKT_ID should not appear since it is a marketing product
         skus.add("SVC_ID");
-        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus, null, null)
+        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus,
+            null, null, null)
             .list();
         assertTrue(results.isEmpty());
     }
@@ -706,19 +790,21 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         skus.add("SKU1");
         skus.add("SKU2");
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, skus, null, null).list();
+            owner, null, null, null, null, null, skus, null, null, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
 
         skus.clear();
         skus.add("SKU2");
-        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus, null, null)
+        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus,
+            null, null, null)
             .list();
         assertEquals(2, results.size());
 
         skus.clear();
         skus.add("SKU1");
-        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus, null, null)
+        results = consumerCurator.searchOwnerConsumers(owner, null, null, null, null, null, skus,
+            null, null, null)
             .list();
 
         assertEquals(1, results.size());
@@ -786,19 +872,21 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         List<String> skus = new ArrayList<String>();
         skus.add("SKU1");
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, skus, null, null).list();
+            owner, null, null, null, null, null, skus, null, null, null).list();
 
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
 
-        results = consumerCurator.searchOwnerConsumers(owner2, null, null, null, null, null, skus, null, null)
+        results = consumerCurator.searchOwnerConsumers(owner2, null, null, null, null, null, skus,
+            null, null, null)
             .list();
 
         assertEquals(1, results.size());
         assertEquals(otherConsumer, results.get(0));
 
         // Searching with no owner cuts across the whole data set
-        results = consumerCurator.searchOwnerConsumers(null, null, null, null, null, null, skus, null, null)
+        results = consumerCurator.searchOwnerConsumers(null, null, null, null, null, null, skus,
+            null, null, null)
             .list();
 
         assertEquals(2, results.size());
@@ -861,7 +949,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         contracts.add("CONTRACT_123");
         contracts.add("CONTRACT_XXX");
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, null, null, contracts).list();
+            owner, null, null, null, null, null, null, null, contracts, null).list();
 
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
@@ -869,13 +957,13 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         contracts.clear();
         contracts.add("CONTRACT_XXX");
         results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, null, null, contracts).list();
+            owner, null, null, null, null, null, null, null, contracts, null).list();
         assertEquals(2, results.size());
 
         contracts.clear();
         contracts.add("CONTRACT_123");
         results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, null, null, contracts).list();
+            owner, null, null, null, null, null, null, null, contracts, null).list();
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
     }
@@ -960,7 +1048,7 @@ public class ConsumerCuratorSearchTest extends DatabaseTestFixture {
         contracts.add("CONTRACT_123");
 
         List<Consumer> results = consumerCurator.searchOwnerConsumers(
-            owner, null, null, null, null, null, skus, null, contracts).list();
+            owner, null, null, null, null, null, skus, null, contracts, null).list();
 
         assertEquals(1, results.size());
         assertEquals(consumer, results.get(0));
