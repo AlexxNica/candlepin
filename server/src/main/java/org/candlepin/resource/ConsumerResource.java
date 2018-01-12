@@ -549,7 +549,6 @@ public class ConsumerResource {
                 IdentityCertificate idCert = generateIdCert(consumer, false);
                 consumer.setIdCert(idCert);
             }
-            sink.emitConsumerCreated(consumer);
 
             if (keys.size() > 0) {
                 consumerBindUtil.handleActivationKeys(consumer, keys, owner.autobindDisabled());
@@ -560,6 +559,7 @@ public class ConsumerResource {
             complianceRules.getStatus(consumer, null, false, false);
             consumerCurator.update(consumer);
 
+            sink.emitConsumerCreated(consumer);
             log.info("Consumer {} created in org {}", consumer.getUuid(), consumer.getOwner().getKey());
 
             return consumer;
@@ -1133,13 +1133,16 @@ public class ConsumerResource {
         if (updated.getContentAccessMode() != null &&
             !updated.getContentAccessMode().equals(toUpdate.getContentAccessMode()) &&
             toUpdate.isManifestDistributor()) {
+
             if (!toUpdate.getOwner().isAllowedContentAccessMode(updated.getContentAccessMode())) {
                 throw new BadRequestException(i18n.tr(
                     "The consumer cannot use the supplied content access mode."));
             }
+
             toUpdate.setContentAccessMode(updated.getContentAccessMode());
             changesMade = true;
         }
+
         if (!StringUtils.isEmpty(updated.getContentAccessMode()) && !toUpdate.isManifestDistributor()) {
             throw new BadRequestException(i18n.tr("The consumer cannot be assigned a content access mode."));
         }

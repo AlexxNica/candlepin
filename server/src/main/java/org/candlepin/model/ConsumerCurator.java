@@ -83,6 +83,12 @@ public class ConsumerCurator extends AbstractHibernateCurator<Consumer> {
         return super.create(entity);
     }
 
+    public Consumer bufferedCreate(Consumer entity) {
+        this.getEntityManager().persist(entity);
+        return entity;
+    }
+
+
     @Override
     @Transactional
     public void delete(Consumer entity) {
