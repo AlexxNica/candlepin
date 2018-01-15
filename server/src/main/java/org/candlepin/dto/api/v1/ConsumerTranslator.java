@@ -29,8 +29,7 @@ import java.util.Set;
  * The ConsumerTranslator provides translation from Consumer model objects to
  * ConsumerDTOs
  */
-public class ConsumerTranslator extends
-    TimestampedEntityTranslator<Consumer, ConsumerDTO> {
+public class ConsumerTranslator extends TimestampedEntityTranslator<Consumer, ConsumerDTO> {
 
     /**
      * {@inheritDoc}

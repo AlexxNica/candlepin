@@ -43,6 +43,11 @@ public class CertificateSerialDTOTest extends AbstractDTOTest<CertificateSerialD
         this.values.put("Updated", new Date());
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

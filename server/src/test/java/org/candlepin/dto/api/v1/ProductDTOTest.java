@@ -78,6 +78,15 @@ public class ProductDTOTest extends AbstractDTOTest<ProductDTO> {
         this.values.put("removeDependentProductId", "blah");
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        Map<String, String> collectionMethods = new HashMap<String, String>();
+        collectionMethods.put("addDependentProductId", "DependentProductIds");
+        collectionMethods.put("removeDependentProductId", "DependentProductIds");
+        // product content need custom tests cause its getters and setters are weird.
+        return collectionMethods;
+    }
+
     /**
      * @{inheritDocs}
      */

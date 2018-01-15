@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing a consumer capability")
+@ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing a GuestIdDTO")
 @JsonFilter("GuestFilter")
 public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
     public static final long serialVersionUID = 1L;
@@ -52,6 +52,9 @@ public class GuestIdDTO extends TimestampedCandlepinDTO<GuestIdDTO> {
     public GuestIdDTO() {
     }
 
+    /**
+     * Convenience constructor for tests with required parameter guestId
+     */
     public GuestIdDTO(String guestId) {
         this();
         this.guestId = guestId;

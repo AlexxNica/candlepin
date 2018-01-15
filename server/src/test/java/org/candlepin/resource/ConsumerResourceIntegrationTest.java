@@ -14,6 +14,7 @@
  */
 package org.candlepin.resource;
 
+import static org.candlepin.test.TestUtil.createConsumerDTO;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -197,7 +198,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
     @Test
     @SuppressWarnings("checkstyle:indentation")
     public void testCreateConsumer() {
-        ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null,
+        ConsumerDTO toSubmit = createConsumerDTO(CONSUMER_NAME, USER_NAME, null,
             standardSystemTypeDTO);
         toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
         ConsumerDTO submitted = consumerResource.create(
@@ -216,7 +217,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
     @Test
     @SuppressWarnings("checkstyle:indentation")
     public void testCreateConsumerVsDefaultServiceLevelForOwner() {
-        ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
+        ConsumerDTO toSubmit = createConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         ConsumerDTO submitted = consumerResource.create(
             toSubmit,
             new UserPrincipal(someuser.getUsername(), Arrays.asList(new Permission [] {
@@ -231,7 +232,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
     @Test(expected = BadRequestException.class)
     public void testCreateConsumerWithUUID() {
         String uuid = "Jar Jar Binks";
-        ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
+        ConsumerDTO toSubmit = createConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         assertNull(toSubmit.getId());
         toSubmit.setUuid(uuid);
         toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
@@ -248,7 +249,8 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
         assertEquals("The Uuids do not match", uuid, submitted.getUuid());
 
         // The second post should fail because of constraint failures
-        ConsumerDTO anotherToSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
+        ConsumerDTO anotherToSubmit = createConsumerDTO(CONSUMER_NAME, USER_NAME, null,
+            standardSystemTypeDTO);
         anotherToSubmit.setUuid(uuid);
         anotherToSubmit.setFact(METADATA_NAME, METADATA_VALUE);
         anotherToSubmit.setId(null);
@@ -268,7 +270,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
 
         // not setting the username here - this should be set by
         // examining the user principal
-        ConsumerDTO consumer = new ConsumerDTO("random-consumer", null, null, standardSystemTypeDTO);
+        ConsumerDTO consumer = createConsumerDTO("random-consumer", null, null, standardSystemTypeDTO);
         consumer = consumerResource.create(consumer, principal, null, null, null, true);
 
         assertEquals(USER_NAME, consumer.getUsername());
@@ -313,7 +315,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
 
     @Test
     public void testRegisterWithConsumerId() {
-        ConsumerDTO toSubmit = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
+        ConsumerDTO toSubmit = createConsumerDTO(CONSUMER_NAME, USER_NAME, null, standardSystemTypeDTO);
         toSubmit.setUuid("1023131");
         toSubmit.setFact(METADATA_NAME, METADATA_VALUE);
 
@@ -330,7 +332,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
         // now pass in consumer type with null id just like the client would
         ConsumerTypeDTO type = new ConsumerTypeDTO(standardSystemType.getLabel());
         assertNull(type.getId());
-        ConsumerDTO nulltypeid = new ConsumerDTO(CONSUMER_NAME, USER_NAME, null, type);
+        ConsumerDTO nulltypeid = createConsumerDTO(CONSUMER_NAME, USER_NAME, null, type);
         submitted = consumerResource.create(
             nulltypeid, TestUtil.createPrincipal(someuser.getUsername(), owner, Access.ALL),
             null, null, null, true);
@@ -523,7 +525,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
 
     @Test
     public void personalNameOverride() {
-        ConsumerDTO personal = TestUtil.createConsumerDTO(personTypeDTO, ownerDTO);
+        ConsumerDTO personal = createConsumerDTO(personTypeDTO, ownerDTO);
 
         personal = consumerResource.create(personal, principal, null, null, null, true);
 
@@ -541,7 +543,7 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
         Principal emailuser = TestUtil.createPrincipal(username, owner, Access.ALL);
         setupPrincipal(emailuser);
 
-        ConsumerDTO personal = TestUtil.createConsumerDTO(personTypeDTO, ownerDTO);
+        ConsumerDTO personal = createConsumerDTO(personTypeDTO, ownerDTO);
         personal.setName(((UserPrincipal) emailuser).getUsername());
 
         personal = consumerResource.create(personal, emailuser, username, null, null, true);
@@ -552,10 +554,10 @@ public class ConsumerResourceIntegrationTest extends DatabaseTestFixture {
 
     @Test(expected = BadRequestException.class)
     public void onlyOnePersonalConsumer() {
-        ConsumerDTO personal = TestUtil.createConsumerDTO(personTypeDTO, ownerDTO);
+        ConsumerDTO personal = createConsumerDTO(personTypeDTO, ownerDTO);
         consumerResource.create(personal, principal, null, null, null, true);
 
-        personal = TestUtil.createConsumerDTO(personTypeDTO, ownerDTO);
+        personal = createConsumerDTO(personTypeDTO, ownerDTO);
         consumerResource.create(personal, principal, null, null, null, true);
     }
 

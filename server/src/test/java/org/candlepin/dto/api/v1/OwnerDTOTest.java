@@ -67,6 +67,11 @@ public class OwnerDTOTest extends AbstractDTOTest<OwnerDTO> {
         this.values.put("Updated", new Date());
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

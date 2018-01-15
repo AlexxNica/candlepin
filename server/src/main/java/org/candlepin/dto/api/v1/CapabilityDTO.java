@@ -50,7 +50,7 @@ public class CapabilityDTO extends TimestampedCandlepinDTO<CapabilityDTO> {
     /**
      * Retrieves the id field of this CapabilityDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the id of the capability, or null if the id has not yet been defined
      */
     public String getId() {
         return this.id;
@@ -71,7 +71,7 @@ public class CapabilityDTO extends TimestampedCandlepinDTO<CapabilityDTO> {
     /**
      * Retrieves the name field of this CapabilityDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the name of the capability, or null if the id has not yet been defined
      */
     public String getName() {
         return this.name;

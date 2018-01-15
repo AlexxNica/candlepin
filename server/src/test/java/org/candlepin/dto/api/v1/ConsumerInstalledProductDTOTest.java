@@ -41,6 +41,11 @@ public class ConsumerInstalledProductDTOTest extends AbstractDTOTest<ConsumerIns
         this.values.put("EndDate", new Date());
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

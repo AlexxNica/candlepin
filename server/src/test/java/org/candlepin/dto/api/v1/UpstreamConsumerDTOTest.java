@@ -55,6 +55,11 @@ public class UpstreamConsumerDTOTest extends AbstractDTOTest<UpstreamConsumerDTO
         this.values.put("Updated", new Date());
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

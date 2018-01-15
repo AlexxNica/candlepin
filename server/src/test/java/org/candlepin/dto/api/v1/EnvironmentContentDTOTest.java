@@ -40,6 +40,11 @@ public class EnvironmentContentDTOTest extends AbstractDTOTest<EnvironmentConten
         this.values.put("Content", content);
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

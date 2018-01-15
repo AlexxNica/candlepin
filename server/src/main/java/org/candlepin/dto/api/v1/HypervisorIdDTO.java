@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModel;
 /**
  * A DTO representation of the HypervisorId entity
  */
-@ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing a consumer capability")
+@ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing a HypervisorId entity")
 public class HypervisorIdDTO extends TimestampedCandlepinDTO<HypervisorIdDTO> {
     public static final long serialVersionUID = 1L;
 

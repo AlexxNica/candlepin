@@ -34,6 +34,11 @@ public class CapabilityDTOTest extends AbstractDTOTest<CapabilityDTO> {
         this.values.put("Name", "test_value");
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

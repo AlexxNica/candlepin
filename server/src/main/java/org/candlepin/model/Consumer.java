@@ -372,7 +372,7 @@ public class Consumer extends AbstractHibernateObject implements Linkable, Owned
     public String toString() {
         String consumerType = (this.getType() != null) ? this.getType().getLabel() : "null";
 
-        return String.format("Consumer [id: %s, uuid: %s, type: %s, name: %s]",
+        return String.format("Consumer [id: %s, uuid: %s, consumerType: %s, name: %s]",
             this.getId(), this.getUuid(), consumerType, this.getName());
     }
 

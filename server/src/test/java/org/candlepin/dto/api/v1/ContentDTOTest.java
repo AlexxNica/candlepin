@@ -51,6 +51,14 @@ public class ContentDTOTest extends AbstractDTOTest<ContentDTO> {
         this.values.put("Locked", Boolean.TRUE);
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        Map<String, String> collectionMethods = new HashMap<String, String>();
+        collectionMethods.put("addModifiedProductId", "ModifiedProductIds");
+        collectionMethods.put("removeModifiedProductId", "ModifiedProductIds");
+        return collectionMethods;
+    }
+
     /**
      * @{inheritDocs}
      */

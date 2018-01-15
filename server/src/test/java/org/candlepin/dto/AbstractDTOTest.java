@@ -62,23 +62,39 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
         this.addToCollectionMethods = new HashMap<String, Method>();
         this.removeFromCollectionMethods = new HashMap<String, Method>();
 
+        Map<String, String> collectionMethods = new HashMap<String, String>(getCollectionMethodsToTest());
+
         // Scan for accessor/mutator pairs to test
         for (Method method : this.dtoClass.getMethods()) {
+            String name = method.getName();
             try {
-                Matcher matcher = ACCESSOR_NAME_REGEX.matcher(method.getName());
+                Matcher matcher = ACCESSOR_NAME_REGEX.matcher(name);
                 if (matcher.matches() && method.getParameterTypes().length == 0) {
                     String fieldName = matcher.group(1);
                     Method mutator = this.dtoClass.getMethod("set" + fieldName, method.getReturnType());
                     fields.put(fieldName, new Method[] { method, mutator });
-
-                    addCollectionMethod(dtoClass, fieldName, "add", addToCollectionMethods);
-                    addCollectionMethod(dtoClass, fieldName, "remove", removeFromCollectionMethods);
                 }
             }
             catch (NoSuchMethodException e) {
                 // Nothing too out of the ordinary here, just asymmetric accessors/mutators.
                 // Continue looking for matches
             }
+
+            if (collectionMethods.containsKey(name)) {
+                if (name.startsWith("add")) {
+                    this.addToCollectionMethods.put(collectionMethods.get(name), method);
+                    collectionMethods.remove(name);
+                }
+                else if (name.startsWith("remove")) {
+                    this.removeFromCollectionMethods.put(collectionMethods.get(name), method);
+                    collectionMethods.remove(name);
+                }
+            }
+        }
+
+        // error out if a bad method name is provided.
+        if (!collectionMethods.isEmpty()) {
+            throw new IllegalStateException("Collection methods not found: " + collectionMethods.keySet());
         }
 
         // Check if we have a copy constructor for this DTO
@@ -102,15 +118,15 @@ public abstract class AbstractDTOTest<T extends CandlepinDTO<T>> {
         }
     }
 
-    public void addCollectionMethod(Class<T> dtoClass, String field, String prefix,
-        Map<String, Method> methodMap) {
-        String singularFieldName = field.substring(0, field.length() - 1);
-        for (Method method : dtoClass.getMethods()) {
-            if (method.getName().contentEquals(prefix + singularFieldName)) {
-                methodMap.put(field, method);
-            }
-        }
-    }
+    /**
+     * Each test overrides this method to list the add/remove methods of the DTO.
+     * Adding a test here ensures that the method will be tested.
+     * Sometimes the method names are abnormal, in which case the test will implement
+     * it's own version of the test.
+     * @return Map<String, String> the collectionMethods map where
+     *   key is the method name and value is the field name
+     */
+    protected abstract Map<String, String> getCollectionMethodsToTest();
 
     public T getPopulatedDTOInstance() {
         try {

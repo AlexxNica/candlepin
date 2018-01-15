@@ -39,6 +39,11 @@ public class GuestIdDTOTest extends AbstractDTOTest<GuestIdDTO> {
         this.values.put("Attributes", attributes);
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

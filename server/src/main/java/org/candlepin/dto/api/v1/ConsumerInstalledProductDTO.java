@@ -65,7 +65,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the id field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the id of the installedProduct, or null if the id has not yet been defined
      */
     public String getId() {
         return this.id;
@@ -86,7 +86,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the productid field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the productId of the installedProduct, or null if the id has not yet been defined
      */
     public String getProductId() {
         return this.productId;
@@ -107,7 +107,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the productName field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the productName of the installedProduct, or null if the id has not yet been defined
      */
     public String getProductName() {
         return productName;
@@ -128,7 +128,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the version field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the version of the installedProduct, or null if the id has not yet been defined
      */
     public String getVersion() {
         return this.version;
@@ -149,7 +149,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the arch field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the arch of the installedProduct, or null if the id has not yet been defined
      */
     public String getArch() {
         return arch;
@@ -170,7 +170,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the status field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the status of the installedProduct, or null if the id has not yet been defined
      */
     public String getStatus() {
         return status;
@@ -191,7 +191,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the startDate field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the start date of the installedProduct, or null if the id has not yet been defined
      */
     public Date getStartDate() {
         return startDate;
@@ -212,7 +212,7 @@ public class ConsumerInstalledProductDTO extends TimestampedCandlepinDTO<Consume
     /**
      * Retrieves the endDate field of this ConsumerInstalledProduct object.
      *
-     * @return a reference to this DTO object.
+     * @return the end date of the installedProduct, or null if the id has not yet been defined
      */
     public Date getEndDate() {
         return endDate;

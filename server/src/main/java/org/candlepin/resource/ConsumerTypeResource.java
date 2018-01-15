@@ -151,7 +151,7 @@ public class ConsumerTypeResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConsumerTypeDTO update(
-        @ApiParam(name = "type", required = true) ConsumerTypeDTO dto) throws BadRequestException {
+        @ApiParam(name = "consumerType", required = true) ConsumerTypeDTO dto) throws BadRequestException {
         ConsumerType type = consumerTypeCurator.find(dto.getId());
 
         if (type == null) {

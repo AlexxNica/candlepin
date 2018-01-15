@@ -26,8 +26,7 @@ import java.util.Set;
  * The CapabilityTranslator provides translation from ConsumerCapability model objects to
  * CapabilityDTOs
  */
-public class EnvironmentTranslator extends
-    TimestampedEntityTranslator<Environment, EnvironmentDTO> {
+public class EnvironmentTranslator extends TimestampedEntityTranslator<Environment, EnvironmentDTO> {
 
     /**
      * {@inheritDoc}

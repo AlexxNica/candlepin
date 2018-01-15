@@ -94,6 +94,18 @@ public class ActivationKeyDTOTest extends AbstractDTOTest<ActivationKeyDTO> {
         this.values.put("addContentOverride", overrideDTO);
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        Map<String, String> collectionMethods = new HashMap<String, String>();
+        collectionMethods.put("addContentOverride", "ContentOverrides");
+        collectionMethods.put("removeContentOverride", "ContentOverrides");
+        collectionMethods.put("addPool", "Pools");
+        collectionMethods.put("removePool", "Pools");
+        collectionMethods.put("addProductId", "ProductIds");
+        collectionMethods.put("removeProductId", "ProductIds");
+        return collectionMethods;
+    }
+
     /**
      * @{inheritDocs}
      */

@@ -164,7 +164,7 @@ public class ConsumerResourceTest {
     public void testValidateShareConsumerRequiresRecipientFact() {
         ConsumerTypeDTO shareDto = new ConsumerTypeDTO(ConsumerTypeEnum.SHARE);
         ConsumerType share = new ConsumerType(ConsumerTypeEnum.SHARE);
-        ConsumerDTO c = new ConsumerDTO("test-consumer", "test-user", new OwnerDTO("Test Owner"),
+        ConsumerDTO c = createConsumerDTO("test-consumer", "test-user", new OwnerDTO("Test Owner"),
             shareDto);
 
         ConsumerResource consumerResource = new ConsumerResource(
@@ -192,7 +192,7 @@ public class ConsumerResourceTest {
     public void testValidateShareConsumerRequiresRecipientPermissions() {
         ConsumerTypeDTO shareDto = new ConsumerTypeDTO(ConsumerTypeEnum.SHARE);
         ConsumerType share = new ConsumerType(ConsumerTypeEnum.SHARE);
-        ConsumerDTO c = new ConsumerDTO("test-consumer", "test-user", new OwnerDTO(
+        ConsumerDTO c = createConsumerDTO("test-consumer", "test-user", new OwnerDTO(
             "Test Owner"), shareDto);
 
         ConsumerResource consumerResource = new ConsumerResource(

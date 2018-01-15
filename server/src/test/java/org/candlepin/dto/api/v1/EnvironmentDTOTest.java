@@ -52,6 +52,11 @@ public class EnvironmentDTOTest extends AbstractDTOTest<EnvironmentDTO> {
         this.values.put("Owner", ownerDTOTest.getPopulatedDTOInstance());
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

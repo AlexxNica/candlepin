@@ -119,31 +119,9 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     }
 
     /**
-     * Initializes a new ConsumerDTO. convenience constructor for tests.
-     * @param name the consumer name to set on the consumer
-     * @param userName the username to set on the consumer
-     * @param owner the owner to set on the consumer
-     * @param type the consumer type to set on the consumer
-     */
-    public ConsumerDTO(String name, String userName, OwnerDTO owner, ConsumerTypeDTO type) {
-        this();
-
-        this.name = name;
-        this.username = userName;
-        this.owner = owner;
-        this.type = type;
-        this.autoheal = true;
-        this.serviceLevel = "";
-        this.entitlementCount = 0L;
-        this.facts = new HashMap<String, String>();
-        this.installedProducts = new HashSet<ConsumerInstalledProductDTO>();
-        this.guestIds = new ArrayList<GuestIdDTO>();
-    }
-
-    /**
      * Retrieves the id field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the id of the consumer, or null if the id has not yet been defined
      */
     @HateoasInclude
     public String getId() {
@@ -165,7 +143,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the uuid field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the uuid of the consumer, or null if the uuid has not yet been defined
      */
     @HateoasInclude
     public String getUuid() {
@@ -187,7 +165,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the name field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the name of the consumer, or null if the name has not yet been defined
      */
     @HateoasInclude
     public String getName() {
@@ -209,7 +187,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the username field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the username of the consumer, or null if the username has not yet been defined
      */
     public String getUsername() {
         return this.username;
@@ -230,7 +208,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the entitlement status field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the entitlementStatus of the consumer, or null if it has not yet been defined
      */
     public String getEntitlementStatus() {
         return entitlementStatus;
@@ -251,7 +229,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the service level field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the serviceLevel of the consumer, or null if it has not yet been defined
      */
     public String getServiceLevel() {
         return this.serviceLevel;
@@ -272,7 +250,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the releaseVer field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the releaseVer of the consumer, or null if it has not yet been defined
      */
     @JsonSerialize(using = ConsumerDTO.ReleaseVersionWrapSerializer.class,
         nullsUsing = ConsumerDTO.ReleaseVersionWrapSerializer.class)
@@ -298,7 +276,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the owner field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the owner of the consumer, or null if it has not yet been defined
      */
     public OwnerDTO getOwner() {
         return this.owner;
@@ -319,7 +297,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the environment field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the environment of the consumer, or null if it has not yet been defined
      */
     public EnvironmentDTO getEnvironment() {
         return this.environment;
@@ -340,7 +318,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the entitlement count field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the entitlementCount of the consumer, or null if it has not yet been defined
      */
     public Long getEntitlementCount() {
         return this.entitlementCount;
@@ -361,7 +339,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the facts field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the facts of the consumer, or null if it has not yet been defined
      */
     @HateoasArrayExclude
     public Map<String, String> getFacts() {
@@ -416,7 +394,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the last checkin field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the lastCheckin of the consumer, or null if it has not yet been defined
      */
     public Date getLastCheckin() {
         return this.lastCheckin;
@@ -437,7 +415,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the installed products field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the installedProducts of the consumer, or null if it has not yet been defined
      */
     public Set<ConsumerInstalledProductDTO> getInstalledProducts() {
         return this.installedProducts != null ?
@@ -538,7 +516,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the consumer capabilities field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the capabilities of the consumer, or null if it has not yet been defined
      */
     public Set<CapabilityDTO> getCapabilities() {
         return this.capabilities != null ? new SetView<CapabilityDTO>(capabilities) : null;
@@ -577,7 +555,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the hypervisor id field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the hypervisorId of the consumer, or null if it has not yet been defined
      */
     public HypervisorIdDTO getHypervisorId() {
         return this.hypervisorId;
@@ -598,7 +576,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the content tags field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the content tags of the consumer, or null if it has not yet been defined
      */
     public Set<String> getContentTags() {
         return this.contentTags != null ? new SetView<String>(this.contentTags) : null;
@@ -630,7 +608,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the auto heal field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return true if consumer is set to be auto healed, false otherwise
      */
     public Boolean getAutoheal() {
         return autoheal;
@@ -651,7 +629,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the recipient owner key field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the recipient owner key of the consumer, or null if it has not yet been defined
      */
     public String getRecipientOwnerKey() {
         return recipientOwnerKey;
@@ -672,7 +650,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the annotations field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the annotations of the consumer, or null if it has not yet been defined
      */
     public String getAnnotations() {
         return annotations;
@@ -693,7 +671,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the content access mode field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the content access modes of the consumer, or null if it has not yet been defined
      */
     public String getContentAccessMode() {
         return this.contentAccessMode;
@@ -714,7 +692,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the type field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the type of the consumer, or null if it has not yet been defined
      */
     public ConsumerTypeDTO getType() {
         return this.type;
@@ -735,7 +713,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the id cert field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the id cert of the consumer, or null if it has not yet been defined
      */
     @HateoasArrayExclude
     public CertificateDTO getIdCert() {
@@ -757,7 +735,8 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Retrieves the guest id field of this ConsumerDTO object.
      *
-     * @return a reference to this DTO object.
+     * @return the guestIds the consumer, or null if it has not yet been defined
+     * The rest call however will never return a guestId list, we only accept guestIds.
      */
     public List<GuestIdDTO> getGuestIds() {
         return this.guestIds != null ?
@@ -845,7 +824,7 @@ public class ConsumerDTO extends TimestampedCandlepinDTO<ConsumerDTO> implements
     /**
      * Returns true if ConsumerDTO object is a guest, false otherwise.
      *
-     * @return a reference to this DTO object.
+     * @return true if this consumer is a guest, false otherwise
      */
     @JsonIgnore
     public boolean isGuest() {

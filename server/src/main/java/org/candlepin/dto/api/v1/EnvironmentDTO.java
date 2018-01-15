@@ -89,7 +89,7 @@ public class EnvironmentDTO extends TimestampedCandlepinDTO<EnvironmentDTO> {
     /**
      * Retrieves the id field of this EnvironmentDTO object.
      *
-     * @return the id field of this EnvironmentDTO object.
+     * @return the name field of this EnvironmentDTO object.
      */
     public String getName() {
         return this.name;

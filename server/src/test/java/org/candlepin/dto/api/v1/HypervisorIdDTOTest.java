@@ -35,6 +35,11 @@ public class HypervisorIdDTOTest extends AbstractDTOTest<HypervisorIdDTO> {
         this.values.put("ReporterId", "test_value");
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        return new HashMap<String, String>();
+    }
+
     /**
      * @{inheritDocs}
      */

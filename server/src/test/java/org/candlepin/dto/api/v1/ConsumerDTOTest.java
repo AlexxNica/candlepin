@@ -121,6 +121,16 @@ public class ConsumerDTOTest extends AbstractDTOTest<ConsumerDTO> {
 
     }
 
+    @Override
+    protected Map<String, String> getCollectionMethodsToTest() {
+        Map<String, String> collectionMethods = new HashMap<String, String>();
+        collectionMethods.put("addInstalledProduct", "InstalledProducts");
+        collectionMethods.put("removeInstalledProduct", "InstalledProducts");
+        collectionMethods.put("addGuestId", "GuestIds");
+        collectionMethods.put("removeGuestId", "GuestIds");
+        return collectionMethods;
+    }
+
     /**
      * @{inheritDocs}
      */

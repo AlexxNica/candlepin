@@ -21,8 +21,7 @@ import org.candlepin.model.GuestId;
  * The GuestIdTranslator provides translation from GuestIdCapability model objects to
  * GuestIdDTOs
  */
-public class GuestIdTranslator extends
-    TimestampedEntityTranslator<GuestId, GuestIdDTO> {
+public class GuestIdTranslator extends TimestampedEntityTranslator<GuestId, GuestIdDTO> {
 
     /**
      * {@inheritDoc}

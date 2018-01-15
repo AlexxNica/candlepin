@@ -21,8 +21,7 @@ import org.candlepin.model.HypervisorId;
  * The HypervisorIdTranslator provides translation from HypervisorId model objects to
  * HypervisorIdDTOs
  */
-public class HypervisorIdTranslator extends
-    TimestampedEntityTranslator<HypervisorId, HypervisorIdDTO> {
+public class HypervisorIdTranslator extends TimestampedEntityTranslator<HypervisorId, HypervisorIdDTO> {
 
     /**
      * {@inheritDoc}
