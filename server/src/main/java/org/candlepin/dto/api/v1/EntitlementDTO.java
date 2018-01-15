@@ -397,7 +397,15 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
                 new Comparator<CertificateDTO>() {
                     @Override
                     public int compare(CertificateDTO c1, CertificateDTO c2) {
-                        return c1 == c2 || (c1 != null && c2.equals(c1)) ? 0 : 1;
+                        if (c1 == c2) {
+                            return 0;
+                        }
+
+                        if (c1 != null && c1.getId() != null) {
+                            return c1.getId().compareTo(c2.getId());
+                        }
+
+                        return 1;
                     }
                 });
 
