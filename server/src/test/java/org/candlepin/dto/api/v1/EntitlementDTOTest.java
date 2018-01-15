@@ -76,12 +76,10 @@ public class EntitlementDTOTest  extends AbstractDTOTest<EntitlementDTO> {
         this.values.put("Pool", pool);
         this.values.put("Consumer", consumer);
         this.values.put("Quantity", 1);
-        this.values.put("Dirty", false);
-        this.values.put("EndDateOverride", new Date());
-        this.values.put("UpdatedOnStart", true);
         this.values.put("DeletedFromPool", false);
-        this.values.put("EndDateOverride", new Date());
         this.values.put("Certificates", certs);
+        this.values.put("StartDate", new Date());
+        this.values.put("EndDate", new Date());
         this.values.put("Created", new Date());
         this.values.put("Updated", new Date());
     }

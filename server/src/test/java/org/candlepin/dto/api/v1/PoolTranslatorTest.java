@@ -179,6 +179,7 @@ public class PoolTranslatorTest extends
     }
 
     @Override
+    @SuppressWarnings("checkstyle:methodlength")
     protected void verifyOutput(Pool source, PoolDTO dest, boolean childrenGenerated) {
         if (source != null) {
             assertEquals(source.getId(), dest.getId());
@@ -217,7 +218,86 @@ public class PoolTranslatorTest extends
             assertEquals(source.getSubscriptionId(), dest.getSubscriptionId());
 
             if (childrenGenerated) {
-                verifyChildrenOutput(source, dest);
+                this.ownerTranslatorTest
+                    .verifyOutput(source.getOwner(), dest.getOwner(), true);
+
+                this.certificateTranslatorTest
+                    .verifyOutput(source.getCertificate(), dest.getCertificate(), true);
+
+                Product sourceProduct = source.getProduct();
+                PoolDTO.ProductDTO destProduct = dest.getProduct();
+                if (sourceProduct != null) {
+                    assertEquals(sourceProduct.getId(), destProduct.getId());
+                    assertEquals(sourceProduct.getName(), destProduct.getName());
+                }
+                else {
+                    assertNull(destProduct);
+                }
+
+                Product sourceDerivedProduct = source.getProduct();
+                PoolDTO.ProductDTO destDerivedProduct = dest.getProduct();
+                if (sourceDerivedProduct != null) {
+                    assertEquals(sourceDerivedProduct.getId(), destDerivedProduct.getId());
+                    assertEquals(sourceDerivedProduct.getName(), destDerivedProduct.getName());
+                }
+                else {
+                    assertNull(destDerivedProduct);
+                }
+
+                Entitlement sourceSourceEntitlement = source.getSourceEntitlement();
+                EntitlementDTO destSourceEntitlement = dest.getSourceEntitlement();
+                if (sourceSourceEntitlement != null) {
+                    assertEquals(sourceSourceEntitlement.getId(), destSourceEntitlement.getId());
+                }
+                else {
+                    assertNull(destSourceEntitlement);
+                }
+
+                SourceSubscription sourceSourceSubscription = source.getSourceSubscription();
+                PoolDTO.SourceSubscriptionDTO destSourceSubscription = dest.getSourceSubscription();
+                if (sourceSourceSubscription != null) {
+                    assertEquals(sourceSourceSubscription.getId(), destSourceSubscription.getId());
+                    assertEquals(sourceSourceSubscription.getSubscriptionId(),
+                        destSourceSubscription.getSubscriptionId());
+                    assertEquals(sourceSourceSubscription.getSubscriptionSubKey(),
+                        destSourceSubscription.getSubscriptionSubKey());
+                }
+                else {
+                    assertNull(destSourceSubscription);
+                }
+
+                SourceStack sourceSourceStack = source.getSourceStack();
+                PoolDTO.SourceStackDTO destSourceStack = dest.getSourceStack();
+                if (sourceSourceStack != null) {
+                    assertEquals(sourceSourceStack.getId(), destSourceStack.getId());
+                    assertEquals(sourceSourceStack.getSourceStackId(),
+                        destSourceStack.getSourceStackId());
+                    assertEquals(sourceSourceStack.getSourceConsumer(),
+                        destSourceStack.getSourceConsumer());
+                }
+                else {
+                    assertNull(destSourceStack);
+                }
+
+                for (Branding brandingSource : source.getBranding()) {
+                    for (BrandingDTO brandingDTO : dest.getBranding()) {
+
+                        assertNotNull(brandingDTO);
+                        assertNotNull(brandingDTO.getProductId());
+
+                        if (brandingDTO.getProductId().equals(brandingSource.getProductId())) {
+                            this.brandingTranslatorTest.verifyOutput(brandingSource, brandingDTO, true);
+                        }
+                    }
+                }
+
+                Set<Product> sourceProducts = source.getProvidedProducts();
+                Set<PoolDTO.ProvidedProductDTO> productsDTO = dest.getProvidedProducts();
+                verifyProductsOutput(sourceProducts, productsDTO);
+
+                Set<Product> sourceDerivedProducts = source.getDerivedProvidedProducts();
+                Set<PoolDTO.ProvidedProductDTO> derivedProductsDTO = dest.getDerivedProvidedProducts();
+                verifyProductsOutput(sourceDerivedProducts, derivedProductsDTO);
             }
             else {
                 assertNull(dest.getOwner());
@@ -234,82 +314,6 @@ public class PoolTranslatorTest extends
         else {
             assertNull(dest);
         }
-    }
-
-    /**
-     * Verifies that the pool's children objects are translated properly.
-     *
-     * @param source the original model Pool object we check against.
-     *
-     * @param dest the translated DTO Pool object who'se children we need to verify.
-     */
-    private void verifyChildrenOutput(Pool source, PoolDTO dest) {
-        this.ownerTranslatorTest
-            .verifyOutput(source.getOwner(), dest.getOwner(), true);
-
-        this.productTranslatorTest
-            .verifyOutput(source.getProduct(), dest.getProduct(), true);
-
-        this.productTranslatorTest
-            .verifyOutput(source.getDerivedProduct(), dest.getDerivedProduct(), true);
-
-        this.certificateTranslatorTest
-            .verifyOutput(source.getCertificate(), dest.getCertificate(), true);
-
-        Entitlement sourceSourceEntitlement = source.getSourceEntitlement();
-        EntitlementDTO destSourceEntitlement = dest.getSourceEntitlement();
-        if (sourceSourceEntitlement != null) {
-            assertEquals(sourceSourceEntitlement.getId(), destSourceEntitlement.getId());
-        }
-        else {
-            assertNull(destSourceEntitlement);
-        }
-
-        SourceSubscription sourceSourceSubscription = source.getSourceSubscription();
-        PoolDTO.SourceSubscriptionDTO destSourceSubscription = dest.getSourceSubscription();
-        if (sourceSourceSubscription != null) {
-            assertEquals(sourceSourceSubscription.getId(), destSourceSubscription.getId());
-            assertEquals(sourceSourceSubscription.getSubscriptionId(),
-                destSourceSubscription.getSubscriptionId());
-            assertEquals(sourceSourceSubscription.getSubscriptionSubKey(),
-                destSourceSubscription.getSubscriptionSubKey());
-        }
-        else {
-            assertNull(destSourceSubscription);
-        }
-
-        SourceStack sourceSourceStack = source.getSourceStack();
-        PoolDTO.SourceStackDTO destSourceStack = dest.getSourceStack();
-        if (sourceSourceStack != null) {
-            assertEquals(sourceSourceStack.getId(), destSourceStack.getId());
-            assertEquals(sourceSourceStack.getSourceStackId(),
-                destSourceStack.getSourceStackId());
-            assertEquals(sourceSourceStack.getSourceConsumer(),
-                destSourceStack.getSourceConsumer());
-        }
-        else {
-            assertNull(destSourceStack);
-        }
-
-        for (Branding brandingSource : source.getBranding()) {
-            for (BrandingDTO brandingDTO : dest.getBranding()) {
-
-                assertNotNull(brandingDTO);
-                assertNotNull(brandingDTO.getProductId());
-
-                if (brandingDTO.getProductId().equals(brandingSource.getProductId())) {
-                    this.brandingTranslatorTest.verifyOutput(brandingSource, brandingDTO, true);
-                }
-            }
-        }
-
-        Set<Product> sourceProducts = source.getProvidedProducts();
-        Set<PoolDTO.ProvidedProductDTO> productsDTO = dest.getProvidedProducts();
-        verifyProductsOutput(sourceProducts, productsDTO);
-
-        Set<Product> sourceDerivedProducts = source.getDerivedProvidedProducts();
-        Set<PoolDTO.ProvidedProductDTO> derivedProductsDTO = dest.getDerivedProvidedProducts();
-        verifyProductsOutput(sourceDerivedProducts, derivedProductsDTO);
     }
 
     /**

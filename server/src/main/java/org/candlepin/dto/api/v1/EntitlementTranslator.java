@@ -62,10 +62,9 @@ public class EntitlementTranslator extends TimestampedEntityTranslator<Entitleme
 
         dest.setId(source.getId());
         dest.setQuantity(source.getQuantity());
-        dest.setDirty(source.isDirty());
-        dest.setEndDateOverride(source.getEndDateOverride());
-        dest.setUpdatedOnStart(source.isUpdatedOnStart());
         dest.setDeletedFromPool(source.deletedFromPool());
+        dest.setStartDate(source.getStartDate());
+        dest.setEndDate(source.getEndDate());
 
         if (modelTranslator != null) {
             Owner owner = source.getOwner();

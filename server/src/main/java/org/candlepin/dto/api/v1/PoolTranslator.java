@@ -104,13 +104,6 @@ public class PoolTranslator extends TimestampedEntityTranslator<Pool, PoolDTO> {
             Owner owner = source.getOwner();
             dest.setOwner(owner != null ? modelTranslator.translate(owner, OwnerDTO.class) : null);
 
-            Product product = source.getProduct();
-            dest.setProduct(product != null ? modelTranslator.translate(product, ProductDTO.class) : null);
-
-            Product derivedProduct = source.getDerivedProduct();
-            dest.setDerivedProduct(derivedProduct != null ?
-                modelTranslator.translate(derivedProduct, ProductDTO.class) : null);
-
             SubscriptionsCertificate subCertificate = source.getCertificate();
             dest.setCertificate(subCertificate != null ?
                 modelTranslator.translate(subCertificate, CertificateDTO.class) : null);
@@ -118,6 +111,23 @@ public class PoolTranslator extends TimestampedEntityTranslator<Pool, PoolDTO> {
             Entitlement sourceEntitlement = source.getSourceEntitlement();
             dest.setSourceEntitlement(sourceEntitlement != null ?
                 modelTranslator.translate(sourceEntitlement, EntitlementDTO.class) : null);
+
+            Product product = source.getProduct();
+            if (product != null) {
+                dest.setProduct(new PoolDTO.ProductDTO(product.getId(), product.getName()));
+            }
+            else {
+                dest.setProduct(null);
+            }
+
+            Product derivedProduct = source.getDerivedProduct();
+            if (derivedProduct != null) {
+                dest.setDerivedProduct(
+                    new PoolDTO.ProductDTO(derivedProduct.getId(), derivedProduct.getName()));
+            }
+            else {
+                dest.setDerivedProduct(null);
+            }
 
             SourceSubscription sourceSubscription = source.getSourceSubscription();
             if (sourceSubscription != null) {

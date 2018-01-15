@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiModel;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.candlepin.common.jackson.HateoasInclude;
 import org.candlepin.jackson.CandlepinAttributeDeserializer;
 import org.candlepin.jackson.CandlepinLegacyAttributeSerializer;
 import org.candlepin.model.Consumer;
@@ -47,8 +48,65 @@ import java.util.Set;
 @XmlRootElement(name = "pool")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing a Pool")
+@JsonFilter("PoolFilter")
 public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  LinkableDTO {
     public static final long serialVersionUID = 1L;
+
+    /**
+     * Internal DTO object for Product
+     */
+    public static class ProductDTO {
+        private final String id;
+        private final String name;
+
+        @JsonCreator
+        public ProductDTO(
+            @JsonProperty("id") String id,
+            @JsonProperty("name") String name) {
+            if (id == null || id.isEmpty()) {
+                throw new IllegalArgumentException("The product id is null or empty.");
+            }
+
+            this.id = id;
+            this.name = name;
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof ProductDTO) {
+                ProductDTO that = (ProductDTO) obj;
+
+                EqualsBuilder builder = new EqualsBuilder()
+                    .append(this.getId(), that.getId())
+                    .append(this.getName(), that.getName());
+
+                return builder.isEquals();
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            HashCodeBuilder builder = new HashCodeBuilder(37, 7)
+                .append(this.getId())
+                .append(this.getName());
+
+            return builder.toHashCode();
+        }
+    }
 
     /**
      * Internal DTO object for ProvidedProduct
@@ -255,8 +313,8 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
     private String id;
     private String type;
     private OwnerDTO owner;
-    private ProductDTO product;
-    private ProductDTO derivedProduct;
+    private PoolDTO.ProductDTO product;
+    private PoolDTO.ProductDTO derivedProduct;
     private SourceSubscriptionDTO sourceSubscription;
     private Boolean activeSubscription;
     private Boolean createdByShare;
@@ -329,6 +387,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      *
      * @return the db id.
      */
+    @HateoasInclude
     public String getId() {
         return id;
     }
@@ -395,7 +454,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * @return the product of this pool.
      */
     @JsonIgnore
-    public ProductDTO getProduct() {
+    public PoolDTO.ProductDTO getProduct() {
         return product;
     }
 
@@ -408,7 +467,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      */
     @JsonProperty
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public PoolDTO setProduct(ProductDTO product) {
+    public PoolDTO setProduct(PoolDTO.ProductDTO product) {
         this.product = product;
         return this;
     }
@@ -419,7 +478,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      * @return the derived product of this pool.
      */
     @JsonIgnore
-    public ProductDTO getDerivedProduct() {
+    public PoolDTO.ProductDTO getDerivedProduct() {
         return derivedProduct;
     }
 
@@ -432,7 +491,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      */
     @JsonProperty
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public PoolDTO setDerivedProduct(ProductDTO derivedProduct) {
+    public PoolDTO setDerivedProduct(PoolDTO.ProductDTO derivedProduct) {
         this.derivedProduct = derivedProduct;
         return this;
     }
@@ -1034,18 +1093,19 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
 
     /**
      * The Marketing/Operations product name for the
-     * <code>productId</code>.
+     * <code>id</code>.
      *
-     * @return the productName
+     * @return the name
      */
     @JsonProperty
+    @HateoasInclude
     public String getProductName() {
         return productName;
     }
 
     /**
      * Set the Marketing/Operations product name for the
-     * <code>productId</code>.
+     * <code>id</code>.
      *
      * @param productName set the productName
      *
@@ -1064,6 +1124,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      *
      * @return Top level product ID.
      */
+    @HateoasInclude
     public String getProductId() {
         return productId;
     }
@@ -1244,6 +1305,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
     /**
      * {@inheritDoc}
      */
+    @HateoasInclude
     @Override
     public String getHref() {
         return "/pools/" + getId();
@@ -1604,7 +1666,7 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
      */
     @Override
     public String toString() {
-        return String.format("PoolDTO [id: %s, type: %s, productId: %s, productName: %s, quantity: %s]",
+        return String.format("PoolDTO [id: %s, type: %s, product id: %s, product name: %s, quantity: %s]",
             this.getId(), this.getType(), this.getProductId(), this.getProductName(),
             this.getQuantity());
     }
@@ -1771,12 +1833,6 @@ public class PoolDTO extends TimestampedCandlepinDTO<PoolDTO> implements  Linkab
 
         OwnerDTO owner = this.getOwner();
         copy.owner = owner != null ? owner.clone() : null;
-
-        ProductDTO product = this.getProduct();
-        copy.product = product != null ? product.clone() : null;
-
-        ProductDTO derivedProduct = this.getDerivedProduct();
-        copy.derivedProduct = derivedProduct != null ? derivedProduct.clone() : null;
 
         CertificateDTO certificate = this.getCertificate();
         copy.certificate = certificate != null ? certificate.clone() : null;

@@ -49,28 +49,9 @@ public class PoolDTOTest extends AbstractDTOTest<PoolDTO> {
         owner.setContentAccessMode("content-access-mode");
         owner.setContentAccessModeList("content-access-mode-list");
 
-        ProductDTO product = new ProductDTO();
-        product.setId("product-id");
-        product.setName("product-name");
-        product.setUuid("product-uuid");
-        product.setHref("product-href");
-        product.setLocked(false);
-        product.setMultiplier(1L);
-        product.setDependentProductIds(new HashSet<String>());
-        product.setAttributes(new HashMap<String, String>());
-        product.setProductContent(new HashSet<ProductDTO.ProductContentDTO>());
-
-        ProductDTO derivedProduct = new ProductDTO();
-        derivedProduct.setId("derived-product-id");
-        derivedProduct.setName("derived-product-name");
-        derivedProduct.setUuid("derived-product-uuid");
-        derivedProduct.setHref("derived-product-href");
-        derivedProduct.setLocked(false);
-        derivedProduct.setMultiplier(1L);
-        derivedProduct.setDependentProductIds(new HashSet<String>());
-        derivedProduct.setAttributes(new HashMap<String, String>());
-        derivedProduct.setProductContent(new HashSet<ProductDTO.ProductContentDTO>());
-
+        PoolDTO.ProductDTO product = new PoolDTO.ProductDTO("product-id", "product-name");
+        PoolDTO.ProductDTO derivedProduct =
+            new PoolDTO.ProductDTO("derived-product-id", "derived-product-name");
         PoolDTO.SourceSubscriptionDTO sourceSubscription =
             new PoolDTO.SourceSubscriptionDTO(
             "source-sub-id",

@@ -22,7 +22,6 @@ import org.candlepin.model.Consumer;
 import org.candlepin.model.Entitlement;
 import org.candlepin.model.EntitlementCertificate;
 
-import java.util.Date;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
@@ -60,9 +59,6 @@ public class EntitlementTranslatorTest extends
         Entitlement source = new Entitlement();
         source.setId("ent-id");
         source.setQuantity(1);
-        source.setEndDateOverride(new Date());
-        source.setDirty(true);
-        source.setUpdatedOnStart(true);
         source.setDeletedFromPool(false);
 
         source.setOwner(this.ownerTranslatorTest.initSourceObject());
@@ -97,9 +93,6 @@ public class EntitlementTranslatorTest extends
 
             assertEquals(source.getId(), dest.getId());
             assertEquals(source.getQuantity(), dest.getQuantity());
-            assertEquals(source.getEndDateOverride(), dest.getEndDateOverride());
-            assertEquals(source.isDirty(), dest.isDirty());
-            assertEquals(source.isUpdatedOnStart(), dest.isUpdatedOnStart());
             assertEquals(source.deletedFromPool(), dest.isDeletedFromPool());
 
             if (childrenGenerated) {

@@ -46,7 +46,6 @@ import org.candlepin.dto.api.v1.CertificateSerialDTO;
 import org.candlepin.dto.api.v1.EntitlementDTO;
 import org.candlepin.dto.api.v1.OwnerDTO;
 import org.candlepin.dto.api.v1.PoolDTO;
-import org.candlepin.dto.api.v1.ProductDTO;
 import org.candlepin.dto.api.v1.UpstreamConsumerDTO;
 import org.candlepin.model.Branding;
 import org.candlepin.model.CandlepinQuery;
@@ -767,19 +766,15 @@ public class OwnerResource {
                 entity.setProvidedProductDtos(Collections.<ProvidedProduct>emptySet());
             }
             else {
-                Set<ProvidedProduct> products = new HashSet<ProvidedProduct>();
+                Set<Product> products = new HashSet<Product>();
                 for (PoolDTO.ProvidedProductDTO providedProductDTO : dto.getProvidedProducts()) {
                     if (providedProductDTO != null) {
-                        ProvidedProduct newProd = new ProvidedProduct();
-                        newProd.setProductId(providedProductDTO.getProductId());
-                        newProd.setProductName(providedProductDTO.getProductName());
+                        Product newProd = new Product(
+                            providedProductDTO.getProductId(), providedProductDTO.getProductName());
                         products.add(newProd);
                     }
                 }
-                // We are using the entity's setProvidedProductDtos() instead of
-                // setProvidedProducts() to populate the providedProducts from the
-                // PoolDTO because the former was marked as @JsonProperty("providedProducts").
-                entity.setProvidedProductDtos(products);
+                entity.setProvidedProducts(products);
             }
         }
 
@@ -788,20 +783,17 @@ public class OwnerResource {
                 entity.setDerivedProvidedProductDtos(Collections.<ProvidedProduct>emptySet());
             }
             else {
-                Set<ProvidedProduct> derivedProducts = new HashSet<ProvidedProduct>();
+                Set<Product> derivedProducts = new HashSet<Product>();
                 for (PoolDTO.ProvidedProductDTO derivedProvidedProductDTO :
                     dto.getDerivedProvidedProducts()) {
                     if (derivedProvidedProductDTO != null) {
-                        ProvidedProduct newDerivedProd = new ProvidedProduct();
-                        newDerivedProd.setProductId(derivedProvidedProductDTO.getProductId());
-                        newDerivedProd.setProductName(derivedProvidedProductDTO.getProductName());
+                        Product newDerivedProd = new Product(
+                            derivedProvidedProductDTO.getProductId(),
+                            derivedProvidedProductDTO.getProductName());
                         derivedProducts.add(newDerivedProd);
                     }
                 }
-                // We are using the entity's setDerivedProvidedProductDtos() instead of
-                // setDerivedProvidedProducts() to populate the derivedProvidedProducts from the
-                // PoolDTO because the former was marked as @JsonProperty("derivedProvidedProducts").
-                entity.setDerivedProvidedProductDtos(derivedProducts);
+                entity.setDerivedProvidedProducts(derivedProducts);
             }
         }
 
@@ -819,7 +811,7 @@ public class OwnerResource {
         }
 
         if (dto.getProduct() != null) {
-            ProductDTO productDTO = dto.getProduct();
+            PoolDTO.ProductDTO productDTO = dto.getProduct();
             Product productModel;
 
             if (productDTO.getId() != null) {
@@ -833,7 +825,7 @@ public class OwnerResource {
         }
 
         if (dto.getDerivedProduct() != null) {
-            ProductDTO derivedProductDTO = dto.getDerivedProduct();
+            PoolDTO.ProductDTO derivedProductDTO = dto.getDerivedProduct();
             Product derivedProductModel;
 
             if (derivedProductDTO.getId() != null) {

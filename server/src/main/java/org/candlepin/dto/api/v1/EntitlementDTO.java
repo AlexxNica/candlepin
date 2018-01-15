@@ -14,11 +14,13 @@
  */
 package org.candlepin.dto.api.v1;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.candlepin.common.jackson.HateoasInclude;
 import org.candlepin.model.Consumer;
 import org.candlepin.util.SetView;
 import org.candlepin.util.Util;
@@ -38,6 +40,7 @@ import java.util.Set;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @ApiModel(parent = TimestampedCandlepinDTO.class, description = "DTO representing an entitlement")
+@JsonFilter("EntitlementFilter")
 public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> implements LinkableDTO {
 
     private static final long serialVersionUID = 1L;
@@ -47,11 +50,10 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
     private Consumer consumer; //TODO: Turn into ConsumerDTO once that is introduced
     private PoolDTO pool;
     private Integer quantity;
-    private Boolean dirty;
-    private Date endDateOverride;
-    private Boolean updatedOnStart;
     private Boolean deletedFromPool;
     private Set<CertificateDTO> certificates;
+    private Date startDate;
+    private Date endDate;
 
     /**
      * Initializes a new EntitlementDTO instance with null values.
@@ -76,6 +78,7 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
      *
      * @return the id field of this EntitlementDTO object.
      */
+    @HateoasInclude
     public String getId() {
         return this.id;
     }
@@ -162,6 +165,7 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
     /**
      * {@inheritDoc}
      */
+    @HateoasInclude
     @Override
     public String getHref() {
         return "/entitlements/" + getId();
@@ -185,79 +189,6 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
      */
     public EntitlementDTO setQuantity(Integer quantity) {
         this.quantity = quantity;
-        return this;
-    }
-
-    /**
-     * Returns true if this EntitlementDTO object is dirty, false otherwise.
-     *
-     * @return true if this EntitlementDTO object is dirty, false otherwise.
-     */
-    @JsonIgnore
-    public Boolean isDirty() {
-        return dirty;
-    }
-
-    /**
-     * Marks this EntitlementDTO object as dirty or not dirty.
-     *
-     * @param dirty if this EntitlementDTO object is dirty or not.
-     *
-     * @return a reference to this EntitlementDTO object.
-     */
-    @JsonProperty
-    public EntitlementDTO setDirty(Boolean dirty) {
-        this.dirty = dirty;
-        return this;
-    }
-
-    /**
-     *
-     * Returns an optional end date override for this entitlement.
-     *
-     * Typically this is set to null, and the pool's end date is used. In some cases
-     * we need to control the expiry of an entitlement separate from the pool.
-     *
-     * @return optional end date override for this entitlement.
-     */
-    @JsonIgnore
-    public Date getEndDateOverride() {
-        return endDateOverride;
-    }
-
-    /**
-     * Sets an optional end date override for this entitlement.
-     *
-     * @param endDateOverride an optional end date override for this entitlement.
-     *
-     * @return a reference to this EntitlementDTO object.
-     */
-    @JsonProperty
-    public EntitlementDTO setEndDateOverride(Date endDateOverride) {
-        this.endDateOverride = endDateOverride;
-        return this;
-    }
-
-    /**
-     * Returns true if this entitlement is updated on start, or false otherwise.
-     *
-     * @return if this entitlement is updated on start or not.
-     */
-    @JsonIgnore
-    public Boolean isUpdatedOnStart() {
-        return updatedOnStart;
-    }
-
-    /**
-     * Sets if this entitlement is updated on start or not.
-     *
-     * @param updatedOnStart if this entitlement is updated on start or not.
-     *
-     * @return a reference to this EntitlementDTO object.
-     */
-    @JsonProperty
-    public EntitlementDTO setUpdatedOnStart(Boolean updatedOnStart) {
-        this.updatedOnStart = updatedOnStart;
         return this;
     }
 
@@ -372,30 +303,45 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
      *
      * @return Returns the startDate from the pool of this entitlement.
      */
+    @JsonProperty
     public Date getStartDate() {
-        if (pool == null) {
-            return null;
-        }
+        return startDate;
+    }
 
-        return pool.getStartDate();
+    /**
+     * Sets the start date of this entitlement.
+     *
+     * @param startDate the startDate of this entitlement.
+     *
+     * @return a reference to this EntitlementDTO object.
+     */
+    @JsonIgnore
+    public EntitlementDTO setStartDate(Date startDate) {
+        this.startDate = startDate;
+        return this;
     }
 
     /**
      * Returns the end date of this entitlement.
      *
-     * @return Returns the endDate. If an override is specified for this entitlement,
-     * we return this value. If not we'll use the end date of the pool.
+     * @return Returns the endDate of this entitlement.
      */
+    @JsonProperty
     public Date getEndDate() {
-        if (endDateOverride != null) {
-            return endDateOverride;
-        }
+        return endDate;
+    }
 
-        if (pool == null) {
-            return null;
-        }
-
-        return pool.getEndDate();
+    /**
+     * Sets the end date of this entitlement.
+     *
+     * @param endDate the endDate of this entitlement.
+     *
+     * @return a reference to this EntitlementDTO object.
+     */
+    @JsonIgnore
+    public EntitlementDTO setEndDate(Date endDate) {
+        this.endDate = endDate;
+        return this;
     }
 
     /**
@@ -439,9 +385,6 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
                 .append(thisPoolId, thatPoolId)
                 .append(thisConsumerId, thatConsumerId)
                 .append(this.getQuantity(), that.getQuantity())
-                .append(this.isDirty(), that.isDirty())
-                .append(this.getEndDateOverride(), that.getEndDateOverride())
-                .append(this.isUpdatedOnStart(), that.isUpdatedOnStart())
                 .append(this.isDeletedFromPool(), that.isDeletedFromPool())
                 .append(this.getEndDate(), that.getEndDate())
                 .append(this.getStartDate(), that.getStartDate());
@@ -485,9 +428,6 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
             .append(this.getPool() != null ? this.getPool().getId() : null)
             .append(this.getConsumer() != null ? this.getConsumer().getUuid() : null)
             .append(this.getQuantity())
-            .append(this.isDirty())
-            .append(this.getEndDateOverride())
-            .append(this.isUpdatedOnStart())
             .append(this.isDeletedFromPool())
             .append(this.getEndDate())
             .append(this.getStartDate())
@@ -518,8 +458,8 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
 
         copy.certificates = this.getCertificates();
 
-        copy.endDateOverride = this.getEndDateOverride() != null ?
-            new Date(this.getEndDateOverride().getTime()) : null;
+        copy.endDate = this.endDate != null ? new Date(this.endDate.getTime()) : null;
+        copy.startDate = this.startDate != null ? new Date(this.startDate.getTime()) : null;
 
         return copy;
     }
@@ -536,11 +476,10 @@ public class EntitlementDTO extends TimestampedCandlepinDTO<EntitlementDTO> impl
             .setPool(source.getPool())
             .setConsumer(source.getConsumer())
             .setQuantity(source.getQuantity())
-            .setDirty(source.isDirty())
-            .setEndDateOverride(source.getEndDateOverride())
-            .setUpdatedOnStart(source.isUpdatedOnStart())
             .setDeletedFromPool(source.isDeletedFromPool())
-            .setCertificates(source.getCertificates());
+            .setCertificates(source.getCertificates())
+            .setEndDate(source.getEndDate())
+            .setStartDate(source.getStartDate());
 
         return this;
     }
