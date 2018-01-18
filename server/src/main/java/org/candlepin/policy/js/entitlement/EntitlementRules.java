@@ -26,7 +26,9 @@ import org.candlepin.model.ConsumerCurator;
 import org.candlepin.model.Entitlement;
 import org.candlepin.model.Owner;
 import org.candlepin.model.OwnerCurator;
+import org.candlepin.model.OwnerProduct;
 import org.candlepin.model.OwnerProductCurator;
+import org.candlepin.model.OwnerProductShare;
 import org.candlepin.model.OwnerProductShareCurator;
 import org.candlepin.model.Pool;
 import org.candlepin.model.PoolQuantity;
@@ -704,9 +706,107 @@ public class EntitlementRules implements Enforcer {
         return result;
     }
 
+    /**
+     * 1. fetch all existing ownerProducts for the recipient
+     * 2. for all products that already exist, create a share record with active = false
+     * 3. for all products that dont exist in recipient, fetch existing share records for that recipient and
+     * product.
+     *   3.1 if share from this owner already exists, update share_date and mark it active.
+     *     3.1.1 if this was not the active record and product uuid is different from the currently active,
+     *     update pools and regenerate else we are done.
+     *   3.2 if share does not already exist, insert new share record.
+     *     3.2.1 if the uuid of the current active record is different, update pools and regenerate. else
+     *     we are done.
+     *
+     * @param sharingOwner
+     * @param recipient
+     * @param sharedProducts
+     * @return
+     */
     private Map<String, Product> resolveProductShares(Owner sharingOwner, Owner recipient,
-        Set<Product> products) {
-        return null;
+        Set<Product> sharedProducts) {
+
+        Map<String, Product> resolvedProducts = new HashMap<String, Product>();
+        Set<String> productIds = new HashSet<String>();
+        Map<String, Product> sharedProductsMap = new HashMap<String, Product>();
+        for (Product product : sharedProducts) {
+            productIds.add(product.getId());
+            sharedProductsMap.put(product.getId(), product);
+        }
+
+        // fetch all information we would need
+        List<Product> existingProducts = ownerProductCurator.getProductsByIds(recipient, productIds).list();
+
+        // Sort existing shares by productId, and also filter the ones belonging to this Sharer.
+        List<OwnerProductShare> sharesToSave = new LinkedList<OwnerProductShare>();
+        List<OwnerProductShare> existingShares = shareCurator.findProductSharesByRecipient(recipient,
+            productIds);
+        Map<String, List<OwnerProductShare>> productIdSharesMap =
+            new HashMap<String, List<OwnerProductShare>>();
+        Map<String, OwnerProductShare> currentOwnerSharesMap =
+            new HashMap<String, OwnerProductShare>();
+        Map<String, OwnerProductShare> currentActiveSharesMap =
+            new HashMap<String, OwnerProductShare>();
+
+        for (OwnerProductShare share : existingShares) {
+            if (!productIdSharesMap.containsKey(share.getProductId())) {
+                productIdSharesMap.put(share.getProductId(), new LinkedList<OwnerProductShare>());
+            }
+            productIdSharesMap.get(share.getProductId()).add(share);
+            if (share.isActive()) {
+                currentActiveSharesMap.put(share.getProductId(), share);
+            }
+            if (share.getSharingOwner().getKey().contentEquals(sharingOwner.getKey())) {
+                currentOwnerSharesMap.put(share.getProductId(), share);
+            }
+            else if (share.isActive()){
+                // other owner shares are to be inactivated
+                share.setActive(false);
+                sharesToSave.add(share);
+            }
+        }
+
+        List<Product> productsChanged = new LinkedList<Product>();
+        // existing products from import
+        for (Product product : existingProducts) {
+            resolvedProducts.put(product.getId(), product);
+            productIds.remove(product.getId());
+        }
+        // products that are only shared to this recipient, not imported
+        for (String productId : productIds) {
+            Product sharedProduct = sharedProductsMap.get(productId);
+            List<OwnerProductShare> shares = productIdSharesMap.get(productId);
+            // look for changed products that were shared but are now changed.
+            if (currentActiveSharesMap.get(productId) != null &&
+                !currentActiveSharesMap.get(productId)
+                    .getProduct().getUuid().contentEquals(sharedProduct.getUuid())) {
+                productsChanged.add(sharedProduct);
+            }
+            resolvedProducts.put(productId, sharedProduct);
+        }
+
+        // insert / update share records
+        for (Product product : sharedProducts) {
+            OwnerProductShare currentOwnerShare = currentOwnerSharesMap.get(product.getId());
+            if (currentOwnerShare == null) {
+                OwnerProductShare ownerProductShare = new OwnerProductShare();
+                ownerProductShare.setProductId(product.getId());
+                ownerProductShare.setSharingOwner(sharingOwner);
+                ownerProductShare.setRecipientOwner(recipient);
+                ownerProductShare.setProduct(product);
+                ownerProductShare.setShareDate(new Date());
+                ownerProductShare.setActive(true);
+                sharesToSave.add(ownerProductShare);
+            }
+            else {
+                currentOwnerShare.setShareDate(new Date());
+                currentOwnerShare.setActive(true);
+                sharesToSave.add(currentOwnerShare);
+            }
+        }
+
+        shareCurator.saveOrUpdateAll(sharesToSave, false, false);
+        return resolvedProducts;
     }
 
     private void postBindVirtLimit(PoolManager poolManager, Consumer c,

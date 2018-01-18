@@ -130,7 +130,7 @@ public class OwnerProductShare extends AbstractHibernateObject implements Owned,
         this.shareDate = shareDate;
     }
 
-    public boolean getActive() {
+    public boolean isActive() {
         return this.active;
     }
 
