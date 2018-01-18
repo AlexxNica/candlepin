@@ -231,10 +231,6 @@ public class HypervisorUpdateJob extends KingpinJob {
             // Maps virt hypervisor ID to registered consumer for that hypervisor, should one exist:
             VirtConsumerMap hypervisorConsumersMap = consumerCurator.getHostConsumersMap(owner, hosts);
 
-            Set<Consumer> newConsumers = new HashSet<Consumer>();
-            Set<Consumer> updatedConsumers = new HashSet<Consumer>();
-
-
             for (String hypervisorId : hosts) {
                 Consumer knownHost = hypervisorConsumersMap.get(hypervisorId);
                 Consumer incoming = incomingHosts.get(hypervisorId);
@@ -246,16 +242,7 @@ public class HypervisorUpdateJob extends KingpinJob {
                     }
                     else {
                         log.debug("Registering new host consumer for hypervisor ID: {}", hypervisorId);
-                        Consumer newHost = createConsumerForHypervisorId(hypervisorId, owner, principal);
-                        consumerResource.checkForFactsUpdate(newHost, incoming);
-                        newHost.setGuestIds(incoming.getGuestIds());
-                        if (newHost.getGuestIds() != null) {
-                            for (GuestId g : newHost.getGuestIds()) {
-                                g.setConsumer(newHost);
-                            }
-                        }
-                        complianceRules.getStatus(newHost, null, false, false);
-                        newConsumers.add(newHost);
+                        Consumer newHost = createConsumerForHypervisorId(hypervisorId, owner, principal, incoming);
                         hypervisorConsumersMap.add(hypervisorId, newHost);
                         result.created(newHost);
                         reportedOnConsumer = newHost;
@@ -278,7 +265,7 @@ public class HypervisorUpdateJob extends KingpinJob {
 
                      if (changesMade) {
                          complianceRules.getStatus(knownHost, null, false, false);
-                         updatedConsumers.add(knownHost);
+                         result.updated(knownHost);
                     }
                     else {
                          result.unchanged(knownHost);
@@ -300,20 +287,11 @@ public class HypervisorUpdateJob extends KingpinJob {
             }
 
             Date now = new Date();
+            java.util.Collection<Consumer> c = hypervisorConsumersMap.getConsumers();
+
             for (Consumer consumer : hypervisorConsumersMap.getConsumers()) {
                 consumer.setLastCheckin(now);
-
-                if (newConsumers.contains(consumer)) {
-                    consumerCurator.create(consumer, false);
-                    result.created(consumer);
-                }
-                else if (updatedConsumers.contains(consumer)) {
-                    consumerCurator.update(consumer, false);
-                    result.updated(consumer);
-                } else {
-                    result.unchanged(consumer);
-                }
-
+                consumer = result.wasCreated(consumer) ? consumerCurator.create(consumer, false) : consumerCurator.update(consumer, false);
             }
 
             consumerCurator.flush();
@@ -393,7 +371,8 @@ public class HypervisorUpdateJob extends KingpinJob {
     /*
      * Create a new hypervisor type consumer to represent the incoming hypervisorId
      */
-    private Consumer createConsumerForHypervisorId(String incHypervisorId, Owner owner, Principal principal) {
+    private Consumer createConsumerForHypervisorId(String incHypervisorId, Owner owner, Principal principal,
+                                                   Consumer incoming) {
         Consumer consumer = new Consumer();
         consumer.setName(sanitizeHypervisorId(incHypervisorId));
         consumer.setType(this.hypervisorType);
@@ -410,12 +389,23 @@ public class HypervisorUpdateJob extends KingpinJob {
         if (principal.getUsername() != null) {
             consumer.setUsername(principal.getUsername());
         }
+        // TODO: Refactor this to not call resource methods directly
         consumerResource.sanitizeConsumerFacts(consumer);
 
 
         // Create HypervisorId
         HypervisorId hypervisorId = new HypervisorId(consumer, incHypervisorId);
         consumer.setHypervisorId(hypervisorId);
+
+        // TODO: Refactor this to not call resource methods directly
+        consumerResource.checkForFactsUpdate(consumer, incoming);
+        consumer.setGuestIds(incoming.getGuestIds());
+        if (consumer.getGuestIds() != null) {
+            for (GuestId g : consumer.getGuestIds()) {
+                g.setConsumer(consumer);
+            }
+        }
+        complianceRules.getStatus(consumer, null, false, false);
         return consumer;
     }
 

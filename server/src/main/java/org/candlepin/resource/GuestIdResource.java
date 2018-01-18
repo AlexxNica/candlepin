@@ -134,14 +134,7 @@ public class GuestIdResource {
         Consumer consumer = new Consumer();
         consumer.setGuestIds(guestIds);
 
-        Set<String> allGuestIds = new HashSet<String>();
-        for (GuestId gid : consumer.getGuestIds()) {
-            allGuestIds.add(gid.getGuestId());
-        }
-        VirtConsumerMap guestConsumerMap = consumerCurator.getGuestConsumersMap(
-            toUpdate.getOwner(), allGuestIds);
-
-        if (consumerResource.performConsumerUpdates(consumer, toUpdate, guestConsumerMap)) {
+        if (consumerResource.performConsumerUpdates(consumer, toUpdate)) {
             consumerCurator.update(toUpdate);
         }
     }
