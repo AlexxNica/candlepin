@@ -58,6 +58,13 @@ public class OwnerProductCurator extends AbstractHibernateCurator<OwnerProduct> 
         return this.getProductById(owner.getId(), productId);
     }
 
+    public OwnerProduct getOwnerProduct(Owner owner, String productUuid) {
+        return (OwnerProduct) createSecureCriteria()
+            .add(Restrictions.eq("ownerId", owner.getId()))
+            .add(Restrictions.eq("productUuid", productUuid))
+            .uniqueResult();
+    }
+
     @Transactional
     public Product getProductById(String ownerId, String productId) {
         return (Product) this.createSecureCriteria()

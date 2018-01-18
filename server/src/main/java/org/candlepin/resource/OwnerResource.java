@@ -61,9 +61,14 @@ import org.candlepin.model.Owner;
 import org.candlepin.model.OwnerCurator;
 import org.candlepin.model.OwnerInfo;
 import org.candlepin.model.OwnerInfoCurator;
+import org.candlepin.model.OwnerProduct;
+import org.candlepin.model.OwnerProductCurator;
+import org.candlepin.model.OwnerProductShare;
+import org.candlepin.model.OwnerProductShareCurator;
 import org.candlepin.model.Pool;
 import org.candlepin.model.Pool.PoolType;
 import org.candlepin.model.PoolFilterBuilder;
+import org.candlepin.model.Product;
 import org.candlepin.model.SourceSubscription;
 import org.candlepin.model.UeberCertificate;
 import org.candlepin.model.UeberCertificateCurator;
@@ -184,6 +189,8 @@ public class OwnerResource {
     private ProductManager productManager;
     private ContentManager contentManager;
     private ConsumerTypeValidator consumerTypeValidator;
+    private OwnerProductShareCurator shareCurator;
+    private OwnerProductCurator productCurator;
 
     @Inject
     public OwnerResource(OwnerCurator ownerCurator,
@@ -214,7 +221,9 @@ public class OwnerResource {
         ResolverUtil resolverUtil,
         ProductManager productManager,
         ContentManager contentManager,
-        ConsumerTypeValidator consumerTypeValidator) {
+        ConsumerTypeValidator consumerTypeValidator,
+        OwnerProductShareCurator ownerProductShareCurator,
+        OwnerProductCurator ownerProductCurator) {
 
         this.ownerCurator = ownerCurator;
         this.ownerInfoCurator = ownerInfoCurator;
@@ -245,6 +254,8 @@ public class OwnerResource {
         this.productManager = productManager;
         this.contentManager = contentManager;
         this.consumerTypeValidator = consumerTypeValidator;
+        this.shareCurator = ownerProductShareCurator;
+        this.productCurator = ownerProductCurator;
     }
 
     /**
@@ -262,6 +273,21 @@ public class OwnerResource {
         return keyFilter != null ?
             this.ownerCurator.lookupByKeys(Arrays.asList(keyFilter)) :
             this.ownerCurator.listAll();
+    }
+
+    @GET
+    @Path("shareAdd")
+    @Produces(MediaType.APPLICATION_JSON)
+    public OwnerProductShare createShare(
+        @QueryParam("sharing_owner") String sharing_owner,
+        @QueryParam("product_id") String product_id,
+        @QueryParam("product_uuid") String product_uuid,
+        @QueryParam("recipient_owner") String recipient_owner) {
+
+        Owner shareO = findOwner(sharing_owner);
+        Owner recO = findOwner(recipient_owner);
+        OwnerProduct op = productCurator.getOwnerProduct(shareO, product_uuid);
+        return shareCurator.testOwnerProductShare(product_id, shareO, op, recO, new Date());
     }
 
     /**
