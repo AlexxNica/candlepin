@@ -26,7 +26,6 @@ import org.candlepin.model.ConsumerCurator;
 import org.candlepin.model.Entitlement;
 import org.candlepin.model.Owner;
 import org.candlepin.model.OwnerCurator;
-import org.candlepin.model.OwnerProduct;
 import org.candlepin.model.OwnerProductCurator;
 import org.candlepin.model.OwnerProductShare;
 import org.candlepin.model.OwnerProductShareCurator;
@@ -88,6 +87,7 @@ public class EntitlementRules implements Enforcer {
     private ProductManager productManager;
     private EventSink eventSink;
     private EventFactory eventFactory;
+    private PoolManager poolManager;
 
     private static final String POST_PREFIX = "post_";
 
@@ -97,7 +97,7 @@ public class EntitlementRules implements Enforcer {
         ProductCurator productCurator, RulesObjectMapper mapper,
         OwnerCurator ownerCurator, OwnerProductCurator ownerProductCurator,
         OwnerProductShareCurator productShareCurator, ProductManager productManager, EventSink eventSink,
-        EventFactory eventFactory) {
+        EventFactory eventFactory, PoolManager poolManager) {
         this.jsRules = jsRules;
         this.dateSource = dateSource;
         this.i18n = i18n;
@@ -111,6 +111,7 @@ public class EntitlementRules implements Enforcer {
         this.productManager = productManager;
         this.eventSink = eventSink;
         this.eventFactory = eventFactory;
+        this.poolManager = poolManager;
         jsRules.init("entitlement_name_space");
     }
 
@@ -737,22 +738,16 @@ public class EntitlementRules implements Enforcer {
         // fetch all information we would need
         List<Product> existingProducts = ownerProductCurator.getProductsByIds(recipient, productIds).list();
 
-        // Sort existing shares by productId, and also filter the ones belonging to this Sharer.
+        // Sort existing shares by productId, and also filter the shares from this owner and active shares.
         List<OwnerProductShare> sharesToSave = new LinkedList<OwnerProductShare>();
         List<OwnerProductShare> existingShares = shareCurator.findProductSharesByRecipient(recipient,
             productIds);
-        Map<String, List<OwnerProductShare>> productIdSharesMap =
-            new HashMap<String, List<OwnerProductShare>>();
         Map<String, OwnerProductShare> currentOwnerSharesMap =
             new HashMap<String, OwnerProductShare>();
         Map<String, OwnerProductShare> currentActiveSharesMap =
             new HashMap<String, OwnerProductShare>();
 
         for (OwnerProductShare share : existingShares) {
-            if (!productIdSharesMap.containsKey(share.getProductId())) {
-                productIdSharesMap.put(share.getProductId(), new LinkedList<OwnerProductShare>());
-            }
-            productIdSharesMap.get(share.getProductId()).add(share);
             if (share.isActive()) {
                 currentActiveSharesMap.put(share.getProductId(), share);
             }
@@ -766,21 +761,20 @@ public class EntitlementRules implements Enforcer {
             }
         }
 
-        List<Product> productsChanged = new LinkedList<Product>();
+        Map<String, Product> productsChanged = new HashMap<String, Product>();
         // existing products from import
         for (Product product : existingProducts) {
             resolvedProducts.put(product.getId(), product);
             productIds.remove(product.getId());
         }
-        // products that are only shared to this recipient, not imported
+        // remaining products are only shared to this recipient, not imported
         for (String productId : productIds) {
             Product sharedProduct = sharedProductsMap.get(productId);
-            List<OwnerProductShare> shares = productIdSharesMap.get(productId);
             // look for changed products that were shared but are now changed.
             if (currentActiveSharesMap.get(productId) != null &&
                 !currentActiveSharesMap.get(productId)
                     .getProduct().getUuid().contentEquals(sharedProduct.getUuid())) {
-                productsChanged.add(sharedProduct);
+                productsChanged.put(sharedProduct.getId(), sharedProduct);
             }
             resolvedProducts.put(productId, sharedProduct);
         }
@@ -806,6 +800,8 @@ public class EntitlementRules implements Enforcer {
         }
 
         shareCurator.saveOrUpdateAll(sharesToSave, false, false);
+        poolManager.refreshEffectedPools(recipient, productsChanged);
+
         return resolvedProducts;
     }
 

@@ -976,6 +976,27 @@ public class CandlepinPoolManager implements PoolManager {
         return this.convertToMasterPoolImpl(sub, owner, productMap);
     }
 
+    /**
+     * Refreshes all pools effected in an owner given the products that changed.
+     * all products that effect non-master pools should effect master pools as well,
+     * also refreshing master pools should fix child pools.
+     * @param owner
+     * @param productMap
+     */
+    @Override
+    public void refreshEffectedPools(Owner owner, Map<String, Product> productMap) {
+        List<Pool> effectedPools = poolCurator.listAvailableEntitlementPools(null,
+            owner, productMap.keySet(), null);
+        for (Pool pool : effectedPools) {
+            /* just refresh normal pools. all products that effect sub pools, have to effect
+             * master pools as well. simply refreshing master pools will fix all others */
+            if (pool.getType() == Pool.PoolType.NORMAL) {
+                //TODO: what happens when derived / derProvProds change? this seems missing
+                this.refreshPoolsForMasterPool(pool, true, true, productMap);
+            }
+        }
+    }
+
     // TODO:
     // Remove these methods or update them to properly mirror the curator.
 

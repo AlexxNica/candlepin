@@ -34,7 +34,7 @@ public class OwnerProductShareCurator extends AbstractHibernateCurator<OwnerProd
 
     public List<OwnerProductShare> findProductSharesByRecipient(Owner owner, Collection<String> productIds) {
         String jpql = "FROM OwnerProductShare ps WHERE ps.productId in (:product_ids) " +
-            "AND ps.recipient.id = :owner_id";
+            "AND ps.recipientOwner.id = :owner_id";
 
         TypedQuery<OwnerProductShare> query = getEntityManager()
             .createQuery(jpql, OwnerProductShare.class)
