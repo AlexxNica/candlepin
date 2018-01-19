@@ -133,7 +133,8 @@ public class ConsumerResourceUpdateTest {
             this.activationKeyCurator, this.entitler, this.complianceRules,
             this.deletedConsumerCurator, this.environmentCurator, null,
             config, null, null, null, this.consumerBindUtil,
-            null, null, new FactValidator(config, this.i18n), null, consumerEnricher, migrationProvider, modelTranslator);
+            null, null, new FactValidator(config, this.i18n),
+            null, consumerEnricher, migrationProvider, modelTranslator);
 
         when(complianceRules.getStatus(any(Consumer.class), any(Date.class), any(Boolean.class),
             any(Boolean.class))).thenReturn(new ComplianceStatus(new Date()));

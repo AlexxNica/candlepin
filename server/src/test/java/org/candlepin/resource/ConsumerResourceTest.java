@@ -178,7 +178,8 @@ public class ConsumerResourceTest {
             mockedEntitlementCertServiceAdapter, i18n, null, null, null, null,
             null, mockedPoolManager, null, mockedOwnerCurator, null, null, null,
             null, null, null, new CandlepinCommonTestConfig(), null, null, null,
-            consumerBindUtil, null, null, factValidator, null, consumerEnricher, migrationProvider, modelTranslator);
+            consumerBindUtil, null, null, factValidator,
+            null, consumerEnricher, migrationProvider, modelTranslator);
 
         UserPrincipal uap = mock(UserPrincipal.class);
         when(uap.canAccess(any(Object.class), any(SubResource.class), any(Access.class))).thenReturn
@@ -206,7 +207,8 @@ public class ConsumerResourceTest {
             mockedEntitlementCertServiceAdapter, i18n, null, null, null, null,
             null, mockedPoolManager, null, mockedOwnerCurator, null, null, null,
             null, null, null, new CandlepinCommonTestConfig(), null, null, null,
-            consumerBindUtil, null, null, factValidator, null, consumerEnricher, migrationProvider, modelTranslator);
+            consumerBindUtil, null, null, factValidator,
+            null, consumerEnricher, migrationProvider, modelTranslator);
 
         UserPrincipal uap = mock(UserPrincipal.class);
         when(uap.canAccess(any(Object.class), any(SubResource.class), any(Access.class))).thenReturn
@@ -754,7 +756,8 @@ public class ConsumerResourceTest {
         ConsumerResource cr = new ConsumerResource(
             mockedConsumerCurator, null, null, null, null, null, null, null, i18n, null, null, null, null,
             null, null, null, mockedOwnerCurator, null, null, null, null, null, null, this.config, null, null,
-            null, null, null, null, this.factValidator, null, consumerEnricher, migrationProvider, modelTranslator);
+            null, null, null, null, this.factValidator,
+            null, consumerEnricher, migrationProvider, modelTranslator);
 
         ArrayList<Consumer> consumers = new ArrayList<Consumer>();
         CandlepinQuery cqmock = mock(CandlepinQuery.class);
